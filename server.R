@@ -20,22 +20,33 @@ server <- function(input, output, session) {
   # show example data
   output$preview.example <- renderDataTable({
     example.dat <- example.dat()
-    if(input$preview.example){example.dat}
+      example.dat
   }, options = list(pageLength = 10))
   
-  # ###===EXAMPLE DATA===###
+
+  # Example Data ------------------------------------------------------------
   observeEvent(input$use.example, {
+    
+    # check for files
+    validate(
+      need(expr = file.exists("data/exampleCovariateDat.csv") & 
+             file.exists("data/exampleMetaboliteDat.csv"),
+           message = "No example data found! Will be uploaded soon.")
+    )
+    
     # metab 
-    input.metab <- reactiveVal(fread("data/exampleMetaboliteDat.csv"))
-    preview.metab <- input.metab()
+    input.metab <- reactiveVal(
+      fread("data/exampleMetaboliteDat.csv")
+      )
     values$input.metab <- input.metab()
-    output$preview.metab <- renderDataTable({preview.metab}, options = list(pageLength = 10))
+    output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
     # covar
-    input.covar <- reactiveVal(fread("data/exampleCovariateDat.csv"))
-    preview.covar <- input.covar()
+    input.covar <- reactiveVal(
+      fread("data/exampleCovariateDat.csv"))
+        
     values$input.covar <- input.covar()
-    output$preview.covar <- renderDataTable({preview.covar}, options = list(pageLength = 10))
+    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
     # output some text when using example data
     output$preview.text <- renderText({"Using example data (2 cohorts with each 500 samples, 5 metabolites and 4 covariates) for analysis. Here is a preview of the data:"})
@@ -49,9 +60,7 @@ server <- function(input, output, session) {
         input.covar <- fread(input$input.covar$datapath,
                              sep = input$sep.covar,
                              quote = input$quote.covar)
-        if(input$preview.covar){
           input.covar
-        }
       },
       error = function(e) {
         stop(safeError(e))
@@ -67,9 +76,7 @@ server <- function(input, output, session) {
         input.metab <- fread(input$input.metab$datapath,
                              sep = input$sep.metab,
                              quote = input$quote.metab)
-        if(input$preview.metab){
           input.metab
-        }
       },
       error = function(e) {
         stop(safeError(e))
@@ -96,9 +103,9 @@ server <- function(input, output, session) {
   
   observeEvent({
     input$input.covar
-    },{
-      updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
-    })
+  },{
+    updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+  })
   
   observeEvent(input$use.example,{
     # Update select input immediately after clicking on the action button.
@@ -333,7 +340,7 @@ server <- function(input, output, session) {
       corr.message <- paste0(
         "None of the covariates correlate with r>", slider.input,
         ". No problem found. ")
-      }
+    }
     output$high.corr <- renderText({corr.message})
     updateSelectInput(session, inputId = "exclude.corr.select", choices = high.corr)
     
@@ -357,7 +364,7 @@ server <- function(input, output, session) {
     values$c.cols <- c.cols
   })
   
-
+  
   # Correlation Plot --------------------------------------------------------
   observeEvent(input$plot.corr.select, {
     req(values$dat)
@@ -392,7 +399,7 @@ server <- function(input, output, session) {
     # save results for output
     output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
     values$res.univar <- res.univar
-  
+    
     message("Finishing")
   })
   
@@ -433,7 +440,7 @@ server <- function(input, output, session) {
     values$c.cols <- c.cols
     
   })
-
+  
   # Multivariable Association -----------------------------------------------
   observeEvent(input$multivar.assoc.button, {
     
@@ -447,13 +454,13 @@ server <- function(input, output, session) {
     
     # compute multivariable association results
     res.multivar <- multivariable_assoc(dometab = m.cols,
-                                    docovar = c.cols,
-                                    data = dat)
+                                        docovar = c.cols,
+                                        data = dat)
     
     res.multivar <- generic_multiple_testing_correction(
       data = res.multivar,
       correctionMethod = multiple.testing)
-
+    
     # save results for output
     output$res.multivar <- renderDataTable(res.multivar, options = list(pageLength = 10))
     values$res.multivar <- res.multivar
@@ -518,7 +525,7 @@ server <- function(input, output, session) {
       metaboliteColumns = m.cols,
       covariateColumns = c.cols
     )
-
+    
     # re-assign output
     annot.c <- results$covariateAnnotation
     annot.m <- results$metaboliteAnnotation
@@ -561,12 +568,12 @@ server <- function(input, output, session) {
         all(
           is.na(
             full.model.r.squared$covariate
-            )
-          ), paste0("None of the covariates were relevant at the chosen cutoff of ",
-                    expression("r"^2),
-                    "> ",
-                    isolate(values$r.squared.cutoff),
-                    ". Please select a lower cutoff."),
+          )
+        ), paste0("None of the covariates were relevant at the chosen cutoff of ",
+                  expression("r"^2),
+                  "> ",
+                  isolate(values$r.squared.cutoff),
+                  ". Please select a lower cutoff."),
         "Done! Please see the following tabs for your results"))
     
     output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))

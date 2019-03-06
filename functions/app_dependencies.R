@@ -10,9 +10,8 @@ for (i in c(
   suppressPackageStartupMessages(library(i, character.only = TRUE))
 }
 
-# shiny Options
+# shiny Options - enable larger Upload sizes
 options(shiny.maxRequestSize=30*1024^2) 
-# try(setwd("MetabCovarSelecter/"), silent = T)
 
 # Functions ---------------------------------------------------------------
 source("functions/plot_correlation.R")

@@ -70,7 +70,6 @@ covariate model for subsequent analysis. This method allows for conservative
                                    '.csv',
                                    '.tsv'
                                  )),
-                       
                        # Input: Select separator ----
                        radioButtons("sep.covar", "Separator",
                                     choices = c(Comma = ",",
@@ -84,13 +83,6 @@ covariate model for subsequent analysis. This method allows for conservative
                                                 "Double Quote" = '"',
                                                 "Single Quote" = "'"),
                                     selected = '"'),
-                       
-                       # Preview Covariates
-                       checkboxInput("preview.covar",
-                                     label = "Preview Covariate Data",
-                                     value = TRUE,
-                                     width = "400px"),
-                       
                        # Horizontal line ----
                        tags$hr(),
                        
@@ -117,24 +109,7 @@ covariate model for subsequent analysis. This method allows for conservative
                                     choices = c(None = "",
                                                 "Double Quote" = '"',
                                                 "Single Quote" = "'"),
-                                    selected = '"'),
-                       
-                       # Horizontal line ----
-                       tags$hr(),
-                       
-                       # preview Metabolites
-                       checkboxInput("preview.metab", label = "Preview Metabolite Data",
-                                     value = TRUE,
-                                     width = "400px"),
-                       tags$hr(),
-                       
-                       inputPanel(
-                         
-                         checkboxInput("preview.example",
-                                       label = "Show example metabolite data layout",
-                                       value = TRUE,
-                                       width = "400px"))
-                       
+                                    selected = '"')
                      ), # END Sidebar panel
                      
                      mainPanel(
