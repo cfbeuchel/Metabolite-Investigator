@@ -39,7 +39,14 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                        p("Multivariable model fit statistics using all (non-excluded) covariates as predictors for each metabolite.
                          Results may be downloaded via the button."),
                        h4("Step 6 - Multivariable Covariate Selection"),
-                       p()
+                       p("Search for covariates explaining a certain amount of variation in your data, e.g. for use as a consensus 
+covariate model for subsequent analysis. This method allows for conservative
+                         analysis of data via the maximum partial explained variance per factor per cohort. The cutoff can be set manually
+                         or the default may be chosen. Additionally, it is possible to include a set of factors as mandatory facors that
+                         will be classified as relevent irrespective of their explained variance. This may be useful in case 
+                         certain factors are known to influence predictors. Downloadable results include metabolite and covariate annotations,
+                         partial explained variances of the relevant as well as the irrelevant (according to the set threshold)
+                         covariates.")
                      )
                    )
                  }),
@@ -262,9 +269,8 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                        textOutput("high.corr"),
                        tags$hr(),
                        tabsetPanel(type = "tabs",
-                                   tabPanel("Correlation", plotOutput("correlation.plot")),
-                                   tabPanel("Covariate Annotation", {
-                                     dataTableOutput("preview.corr.annot.c")})
+                                   tabPanel("Correlation", plotOutput("correlation.plot", )),
+                                   tabPanel("Covariate Annotation", dataTableOutput("preview.corr.annot.c"))
                        )
                      )  
                    )
@@ -346,7 +352,7 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                        # sidebarPanel(
                        conditionalPanel(
                          condition = "input.ChangeBasedOnThis != 'Plot'",
-                           helpText("Download the results here"),
+                           helpText("Download the results of the analysis here:"),
                            tags$hr(),
                            helpText("Download Relevant Covariates:"),
                            downloadButton("download.full.model.r.squared", "Download"),
@@ -375,28 +381,24 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                            tags$hr(),
                            plotOutput("multi.plot", hover = T)
                          ),
-                         # tabPanel(title = "Results", 
-                         #   h3("Results"),
-                         #   tags$hr(),
-                         #   helpText("jksdkfsfsdflkj"),
-                         #   helpText("Was ist los???")),
-                         tabPanel("Relevant Covariates", {
-                           h4("Your relevant covariates are:")
-                           p("This table displays the maximum-partial-r² found per covariate per column.")
-                           tags$hr()
-                           dataTableOutput("res.full.model")}),
-                         tabPanel("Association Statistics", {
-                           h4("Association Statistics")
-                           tags$hr()
-                           dataTableOutput("res.all.multi")}),
-                         tabPanel("Metabolite Annotation", {
-                           h4("Your Metabolite Annotation")
-                           tags$hr()
-                           dataTableOutput("res.annot.m")}),
-                         tabPanel("Covariate Annotation", {
-                           h4("Your Covariate Annotation")
-                           tags$hr()
-                           dataTableOutput("res.annot.c")})
+                         tabPanel("Relevant Covariates",
+                           h4("Your relevant covariates are:"),
+                           helpText("This table displays the maximum-partial-r-squared found per covariate per cohort that passed the set threshold."),
+                           tags$hr(),
+                           dataTableOutput("res.full.model")
+                           ),
+                         tabPanel("Association Statistics", 
+                           h4("Association Statistics"),
+                           tags$hr(),
+                           dataTableOutput("res.all.multi")),
+                         tabPanel("Metabolite Annotation",
+                           h4("Your Metabolite Annotation"),
+                           tags$hr(),
+                           dataTableOutput("res.annot.m")),
+                         tabPanel("Covariate Annotation",
+                           h4("Your Covariate Annotation"),
+                           tags$hr(),
+                           dataTableOutput("res.annot.c"))
                        )
                      ) # mainPanel
                    ) # sidebarLayout

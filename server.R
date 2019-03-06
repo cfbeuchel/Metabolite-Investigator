@@ -2,7 +2,7 @@
 server <- function(input, output, session) {
   
   # load dependencies
-  source(file = "app_dependencies.R")
+  source(file = "functions/app_dependencies.R")
   
   # for storage
   values <- reactiveValues()
@@ -178,9 +178,6 @@ server <- function(input, output, session) {
   })
   
   # Data preprocessing ------------------------------------------------------
-  # isolate data
-  
-  ##===========================================
   observeEvent(input$button.prepro, {
     
     dat <- isolate(values$dat)
@@ -304,7 +301,7 @@ server <- function(input, output, session) {
     values$slider.input <- input$corr.cut.slider
   })
   
-  # Pressing button =================
+  # Pressing button
   observeEvent(input$corr.check.button, {
     
     # input
@@ -362,7 +359,6 @@ server <- function(input, output, session) {
   
 
   # Correlation Plot --------------------------------------------------------
-  
   observeEvent(input$plot.corr.select, {
     req(values$dat)
     cohort <- input$plot.corr.select
@@ -437,7 +433,6 @@ server <- function(input, output, session) {
     values$c.cols <- c.cols
     
   })
-  
 
   # Multivariable Association -----------------------------------------------
   observeEvent(input$multivar.assoc.button, {
@@ -475,7 +470,6 @@ server <- function(input, output, session) {
   )
   
   # Covariable Selection ----------------------------------------------------
-  
   # get parameters
   observe({
     values$r.squared.cutoff <- input$r.squared.cutoff.slider
@@ -562,7 +556,18 @@ server <- function(input, output, session) {
     values$c.cols <- c.cols
     
     message("Done!")
-    output$covar.select.stop <- renderText("Done! Please see the last Tab for your results")
+    output$covar.select.stop <- renderText(
+      ifelse(
+        all(
+          is.na(
+            full.model.r.squared$covariate
+            )
+          ), paste0("None of the covariates were relevant at the chosen cutoff of ",
+                    expression("r"^2),
+                    "> ",
+                    isolate(values$r.squared.cutoff),
+                    ". Please select a lower cutoff."),
+        "Done! Please see the following tabs for your results"))
     
     output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
     output$res.full.model <- renderDataTable(isolate(values$full.model.r.squared), options = list(pageLength = 10))
@@ -570,9 +575,7 @@ server <- function(input, output, session) {
     output$res.annot.c <- renderDataTable(isolate(values$annot.c), options = list(pageLength = 10))
   })
   
-  
   # Results -----------------------------------------------------------------
-  
   # prepare data for download
   output$download.full.model.r.squared <- downloadHandler(
     filename = "Covariate_Selection.csv",
@@ -604,9 +607,4 @@ server <- function(input, output, session) {
       fwrite(isolate(values$all.multi), file)
     }
   )
-
-  
-  
-  
-  
 }

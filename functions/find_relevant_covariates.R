@@ -36,6 +36,9 @@ find_relevant_covariates <- function(
     annot.c[, paste0(missingness.cutoff*100, ".percent.missing.exclusion") := F]
   }
   
+  # create a column to mark mandatory inclusion
+  annot.c[, mandatory.inclusion := ifelse(covariate %in% (mandatory.inclusion), T, F)]
+  
   # loop through all r2 cutoffs selected
   all.pr2sel.res <- lapply(r.squared.cutoff, function(i){
     
@@ -57,8 +60,8 @@ find_relevant_covariates <- function(
     for(x in unique(res$cohort)){
       
       # relevant terms in this cohort
-      rel.terms <- res[cohort == (x), term]
-      
+      rel.terms <- res[cohort == (x) & max.r.squared >= r.squared.cutoff, term]
+
       # enter into annotation table
       annot.c[cohort == (x), 
               paste0("relevant.at.", (i)*100, ".percent.r2") := 
@@ -89,6 +92,8 @@ find_relevant_covariates <- function(
   
   # ================================================================
   # while there is no covar with r2 <= 0.025 in all cohorts, do this:
+  if(!all(is.na(final.pred))){
+    
   repeat{
     
     # ========================
@@ -191,6 +196,11 @@ find_relevant_covariates <- function(
   setnames(x = partial.res, old = "metab", new = "response", skip_absent = T)
   partial.res <- partial.res[ , .SD, .SDcols = setdiff(names(partial.res),
                                                       c("statistic"))]
+  
+  } else{ # end IF (empty final pred)
+    full.model.r.squared <- data.table(covariate = NA)
+    partial.res <- NA
+  } # end fail statement -> return empty results
   
   # return
   return(list(covariateAnnotation = annot.c,

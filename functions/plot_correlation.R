@@ -33,6 +33,6 @@ plot_correlation <- function(data, cohort){
            insig = "blank", # hide correlation coefficient on the principal diagonal
            outline = T,
            diag = FALSE,
-           mar = c(0,0,2,0)
+           mar = c(0,0,2,0) # , tl.cex = 2
   )
 }

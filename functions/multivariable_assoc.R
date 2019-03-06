@@ -6,6 +6,7 @@ multivariable_assoc <- function(dometab, docovar, data, r_on_server = F) {
   all.cohort.multivariable <- lapply(unique(data$cohort), function(mycohort){
     
     # Testplan
+    # mycohort <- "study_a"
     todo <- expand.grid(covar = docovar, metab = dometab, stringsAsFactors = F)
     setDT(todo)
     
@@ -63,11 +64,19 @@ multivariable_assoc <- function(dometab, docovar, data, r_on_server = F) {
           # remove double mentions from coeffs.raw.lm
           # check which coeffs.raw.lm$rn is mentioned more than once in coeffs.raw.lm and take the one with the smalles p-value
           exclude.rows <- sapply(mycovars, function(i){
+            # i <- mycovars[2]
+            
+            # do not remove anything by default
+            remove.this <- NULL
             db <- grep(pattern = paste0("^",i, "[0-9]$"), x = coeffs.raw.lm$rn)
+            
             if(length(db)!=0){
+              # which of the factor results should I keep? -> dbi is the row to keep
               dbi <- coeffs.raw.lm[db, which(pval.lm == min(pval.lm))]
+              keep.this <- db[dbi]
+              remove.this <- db[db != keep.this]
             }
-            exclude <- db[!(db %in% db)[dbi]]
+            return(remove.this)
           })
           
           # get all row indices to exclude

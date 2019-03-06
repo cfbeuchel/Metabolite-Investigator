@@ -40,6 +40,7 @@ remaining_covariates <- function(
     # get all covars 
     # ft = full terms
     ft <- c(my.add.term, obl.terms)
+    ft <- ft[!is.na(ft)]
     
     # calc partial-r2
     res.partial <- partial_r_squared_excluded_covars(

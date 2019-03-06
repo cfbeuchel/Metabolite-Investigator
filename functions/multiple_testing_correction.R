@@ -8,10 +8,14 @@ multiple_testing_correction <- function(
   res.remaining <- dataObjectRemaining
   multiple.testing.correction <- correctionMethod
   
+  # remove NA elements from merging (in case no covariate was selected)
+  to.merge <- list(res.selected, 
+                   res.remaining)
+  to.merge <- to.merge[!is.na(to.merge)]
+  
   # merge data from all partial r.squared objects
   all.multi <- rbindlist(
-    list(res.selected, 
-         res.remaining),
+    to.merge,
     use.names = T)
   
   if(multiple.testing.correction == "fdr"){

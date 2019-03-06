@@ -69,6 +69,8 @@ relevance_backwards_selection <- function(rSquaredCutoff,
       terms <- all.terms.list[[x]]
       
       # predictors partial r squared
+      
+      if(!length(terms) == 0){
       res <- partial_r_squared(
         cohort = x,
         predictors = terms,
@@ -76,6 +78,19 @@ relevance_backwards_selection <- function(rSquaredCutoff,
         data = rawData,
         rSquaredCutoff = rSquaredCutoff,
         verbose = F)
+      } else {
+        res <- data.table(cohort = x,
+                          metab = allResponses,
+                          term = NA,
+                          estimate = NA,
+                          std.error = NA,
+                          statistic = NA,
+                          term.r.squared = NA,
+                          model.r.squared = NA,
+                          p.value = NA,
+                          n = NA,
+                          r.squared.cutoff = rSquaredCutoff)
+      }
     })
     
     # bin results together
@@ -130,13 +145,16 @@ relevance_backwards_selection <- function(rSquaredCutoff,
         
       }, USE.NAMES = T, simplify = F) # END OF APPLY
       
-    } else if(all(melt.max.min.res$max.r.squared >= rSquaredCutoff)) {break} # stop!
-    
-    # stop in case no covariate meets the criterium
-    if(length(unlist(new.confounders.list))==0){
-      stop("No covariate meets the cutoff criterium! Please select a lower r-squared cutoff.")
-    }
-    
+    } else if(all(melt.max.min.res$max.r.squared >= rSquaredCutoff)) {
+      # stop!
+      break
+      } else if(length(unlist(old.confounders.list))==0){
+        
+        # remove the last (non-relevant) covariate and return the result
+        # stop in case no covariate meets the criterium
+        break
+        # stop("No covariate meets the cutoff criterium! Please select a lower r-squared cutoff.")
+      }
   } # end of repeat loop
   
   # return the old.confounders variable (no reassignment as new.confounder when max.min >= 0.05)
