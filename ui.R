@@ -50,7 +50,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )
                    )
                  }),
-                 tabPanel("Data Upload",{
+                 tabPanel("1.1 Data Upload",{
                    sidebarLayout(
                      sidebarPanel(
                        # use example data
@@ -122,7 +122,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )
                    )
                  }),
-                 tabPanel("Data Preparation",{
+                 tabPanel("1.2 Data Preparation",{
                    sidebarLayout(
                      sidebarPanel(
                        helpText("Select the columns in your data that represent cohort, batch and sample ID.
@@ -159,7 +159,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )
                    )
                  }),
-                 tabPanel("Data Pre-Processing", {
+                 tabPanel("2. Data Pre-Processing", {
                    sidebarLayout(
                      sidebarPanel(
                        helpText("Press this button to pre-process your data"),
@@ -186,7 +186,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )
                    )
                  }),
-                 tabPanel("Univariable Association",{
+                 tabPanel("3. Univariable Association",{
                    sidebarLayout(
                      sidebarPanel(
                        helpText("Compute univariable association statistics for each metabolite and covariate in each cohort.
@@ -208,13 +208,13 @@ covariate model for subsequent analysis. This method allows for conservative
                        h3("Univariable Covariate Association"),
                        tags$hr(),
                        tabsetPanel(type = "tabs",
-                                   tabPanel("Plot", plotOutput("plot.univar")),
+                                   tabPanel("Plot", plotOutput("plot.univar", width = "70%")),
                                    tabPanel("Results", dataTableOutput("res.univar"))
                        )
                      )
                    )
                  }),
-                 tabPanel("Correlation Check", {
+                 tabPanel("4. Correlation Check", {
                    sidebarLayout(
                      sidebarPanel(
                        helpText("You can remove highly correlating (Pearsons Correlation Coefficient) covariates from further analysis.
@@ -252,7 +252,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )  
                    )
                  }),
-                 tabPanel("Multivariable Association", {
+                 tabPanel("5. Multivariable Association", {
                    sidebarLayout(
                      sidebarPanel(
                        helpText("Compute multivariable association statistics for each metabolite and all avaiable covariates in each cohort.
@@ -279,7 +279,7 @@ covariate model for subsequent analysis. This method allows for conservative
                      )
                    )
                  }),
-                 tabPanel("Covariate Selection", {
+                 tabPanel("6. Covariate Selection", {
                    sidebarLayout(
                      sidebarPanel(
                        conditionalPanel(
@@ -356,7 +356,7 @@ covariate model for subsequent analysis. This method allows for conservative
                            tags$hr(),
                            textOutput("covar.select.stop"),
                            tags$hr(),
-                           plotOutput("multi.plot", hover = T)
+                           plotOutput("multi.plot", hover = T, width = "70%")
                          ),
                          tabPanel("Relevant Covariates",
                            h4("Your relevant covariates are:"),

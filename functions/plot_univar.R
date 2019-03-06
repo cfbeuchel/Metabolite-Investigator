@@ -18,6 +18,7 @@ plot_univar <- function(data){
           legend.position = "bottom",
           panel.border = element_blank(),
           axis.line.y = element_blank(),
+          axis.line.x = element_line(),
           panel.grid.major.y = element_blank(),
           panel.grid.major = element_line(size = .2, colour = "grey90")
     )
