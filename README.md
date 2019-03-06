@@ -6,8 +6,9 @@ This is a Shiny-App. Proper documentation will be added soon. For now, the app
 can be started directly from this repository via:
 
 ```r
-# load the Shiny package # to install shiny run:
+# to install shiny run:
 # install.packages("shiny")
+# load the Shiny package
 library("shiny")
 
 # Start the App directly through Github

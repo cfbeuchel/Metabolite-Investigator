@@ -273,7 +273,7 @@ server <- function(input, output, session) {
     output$prepro.success <- renderText("Pre-processing of data was successful!")
     
     # Preview --------------------------
-    if(input$button.preview.prepro==T){
+    # if(input$button.preview.prepro==T){
       # show annotation table
       output$prepro.annot.m <- renderDataTable({
         annot.m
@@ -287,7 +287,7 @@ server <- function(input, output, session) {
       output$prepro.data <- renderDataTable({
         dat
       }, options = list(pageLength = 10))
-    }
+    # }
     
     # update selector for correlation
     updateSelectInput(session, "plot.corr.select","Display Correlation in Cohort", choices = unique(dat$cohort))
@@ -299,6 +299,13 @@ server <- function(input, output, session) {
     values$m.cols <- m.cols
     values$c.cols <- c.cols
     
+    prepro.description <- NULL
+    
+    output$prepro.description <- renderText({
+      validate(
+        need(!is.null(prepro.description), message = "This is not yet available. See future Updates for a detailed description.")
+      )
+    })
     
   }) # end of prepro
   
@@ -403,6 +410,16 @@ server <- function(input, output, session) {
     output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
     values$res.univar <- res.univar
     
+    # placeholder
+    univar.description <- NULL
+    
+    # output methods text
+    output$univar.description <- renderText({
+      validate(
+        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+      )
+    })
+    
     message("Finishing")
   })
   
@@ -467,6 +484,16 @@ server <- function(input, output, session) {
     # save results for output
     output$res.multivar <- renderDataTable(res.multivar, options = list(pageLength = 10))
     values$res.multivar <- res.multivar
+    
+    # placeholder
+    multivar.description <- NULL
+    
+    # output methods text
+    output$multivar.description <- renderText({
+      validate(
+        need(!is.null(multivar.description), message = "This is not yet available. See future Updates for a detailed description.")
+      )
+    })
     
     message("Finishing")
   })
@@ -577,8 +604,23 @@ server <- function(input, output, session) {
                   "> ",
                   isolate(values$r.squared.cutoff),
                   ". Please select a lower cutoff."),
-        "Done! Please see the following tabs for your results"))
+        "Done! Please see the following tabs for your results"
+        )
+      )
     
+
+    # Methods Description -----------------------------------------------------
+    # placeholder
+    univar.description <- NULL
+    
+    # output methods text
+    output$univar.description <- renderText({
+      validate(
+        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+      )
+    })
+    
+    # Output
     output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
     output$res.full.model <- renderDataTable(isolate(values$full.model.r.squared), options = list(pageLength = 10))
     output$res.annot.m <- renderDataTable(isolate(values$annot.m), options = list(pageLength = 10))
