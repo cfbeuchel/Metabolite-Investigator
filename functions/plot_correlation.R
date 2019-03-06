@@ -1,5 +1,6 @@
-plot_correlation <- function(data, cohort){
+plot_correlation <- function(data, cohort, covariates){
   
+  c.cols <- covariates
   dat <- data
   x <- cohort
   
@@ -33,6 +34,6 @@ plot_correlation <- function(data, cohort){
            insig = "blank", # hide correlation coefficient on the principal diagonal
            # outline = T,
            diag = FALSE,
-           mar = c(0,0,2.5,0), tl.cex = 1.5, number.cex = 1.5
+           mar = c(0,0,3,0), tl.cex = 1.5, number.cex = 1.5
   )
 }

@@ -369,8 +369,11 @@ server <- function(input, output, session) {
   observeEvent(input$plot.corr.select, {
     req(values$dat)
     cohort <- input$plot.corr.select
-    data <- isolate(values$dat)
-    output$correlation.plot <- renderPlot(plot_correlation(data = dat, cohort = cohort))
+    dat <- isolate(values$dat)
+    c.cols <- isolate(values$c.cols)
+    output$correlation.plot <- renderPlot(plot_correlation(data = dat,
+                                                           covariates = c.cols,
+                                                           cohort = cohort))
   })
   
   # Univariable Association -------------------------------------------------

@@ -6,11 +6,12 @@ This is a Shiny-App. Proper documentation will be added soon. For now, the app
 can be started directly from this repository via:
 
 ```r
-# load the Shiny package # to install shiny run: install.packages("shiny")
+# load the Shiny package # to install shiny run:
+# install.packages("shiny")
 library("shiny")
 
-# Start the App directly through Github runGitHub("Metabolite-Investigator",
-"cfbeuchel")
+# Start the App directly through Github
+runGitHub("Metabolite-Investigator", "cfbeuchel")
 ```
 
 The App comes with example data from two cohorts that may be used to try out
