@@ -244,7 +244,9 @@ covariate model for subsequent analysis. This method allows for conservative
                        textOutput("high.corr"),
                        tags$hr(),
                        tabsetPanel(type = "tabs",
-                                   tabPanel("Correlation", plotOutput("correlation.plot", )),
+                                   tabPanel("Correlation", plotOutput("correlation.plot",
+                                                                      width = "auto",
+                                                                      height = "700px")),
                                    tabPanel("Covariate Annotation", dataTableOutput("preview.corr.annot.c"))
                        )
                      )  

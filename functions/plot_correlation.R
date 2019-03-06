@@ -31,8 +31,8 @@ plot_correlation <- function(data, cohort){
            p.mat = p.mat, # Combine with significance
            sig.level = 0.01,
            insig = "blank", # hide correlation coefficient on the principal diagonal
-           outline = T,
+           # outline = T,
            diag = FALSE,
-           mar = c(0,0,2,0) # , tl.cex = 2
+           mar = c(0,0,2.5,0), tl.cex = 1.5, number.cex = 1.5
   )
 }
