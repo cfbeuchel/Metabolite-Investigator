@@ -614,7 +614,7 @@ server <- function(input, output, session) {
     univar.description <- NULL
     
     # output methods text
-    output$univar.description <- renderText({
+    output$selection.description <- renderText({
       validate(
         need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
       )
