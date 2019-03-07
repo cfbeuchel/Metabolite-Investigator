@@ -66,7 +66,7 @@ show_highly_correlating <- function(
   }, USE.NAMES = F)
   
   # consolidate
-  all.high.corr <- Reduce(intersect, all.high.corr)
+  all.high.corr <- Reduce(union, all.high.corr)
   
   # get all high correlating covariates
   message(paste0("The covariates ", paste(all.high.corr, collapse = ", "),

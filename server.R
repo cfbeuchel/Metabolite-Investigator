@@ -37,7 +37,8 @@ server <- function(input, output, session) {
     # metab 
     input.metab <- reactiveVal(
       fread("data/exampleMetaboliteDat.csv")
-      )
+    )
+    
     values$input.metab <- input.metab()
     output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
@@ -48,8 +49,15 @@ server <- function(input, output, session) {
     values$input.covar <- input.covar()
     output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
+    # Mergin buttons
+    # Update select input immediately after clicking on the action button.
+    updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
+    updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
+    updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
+    updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+    
     # output some text when using example data
-    output$preview.text <- renderText({"Using example data (2 cohorts with each 500 samples, 5 metabolites and 4 covariates) for analysis. Here is a preview of the data:"})
+    output$preview.text <- renderText({"Using example data (2 cohorts with each 500 samples, 5 metabolites and 4 covariates) for analysis."})
   })
   
   # preview covar data
@@ -84,36 +92,51 @@ server <- function(input, output, session) {
     )
   }, options = list(pageLength = 10))
   
-  observeEvent(input$input.covar, {
-    values$input.covar <- (fread(input$input.covar$datapath, sep=input$sep.covar))
-  })
-  observeEvent(input$input.metab, {
-    values$input.metab <- (fread(input$input.metab$datapath, sep=input$sep.metab))
-  })
+  # observeEvent(input$input.covar, {
+  #   values$input.covar <- (fread(input$input.covar$datapath, sep=input$sep.covar))
+  # })
+  # observeEvent(input$input.metab, {
+  #   values$input.metab <- (fread(input$input.metab$datapath, sep=input$sep.metab))
+  # })
   
   # column button
   observeEvent({
     input$input.metab
   },{
+    # upload data
+    values$input.metab <- (fread(input$input.metab$datapath, sep=input$sep.metab))
+    
     # Update select input immediately after clicking on the action button.
     updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
     updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
     updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
+    
+    # output message
+    output$metab.upload.success <- renderText("Metabolite data uploaded successfully. Please make sure it is the right data.")
   })
   
+  # oberve Covar Upload
   observeEvent({
     input$input.covar
   },{
+    # upload covar data
+    values$input.covar <- (fread(input$input.covar$datapath, sep=input$sep.covar))
+    
+    # update button
     updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+    
+    # output message
+    output$covar.upload.success <- renderText("Covariate data uploaded successfully. Please make sure it is the right data.")
   })
   
-  observeEvent(input$use.example,{
-    # Update select input immediately after clicking on the action button.
-    updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
-    updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
-    updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
-    updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
-  })
+  # observeEvent(input$use.example,{
+  #   
+  #   # Update select input immediately after clicking on the action button.
+  #   updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
+  #   updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
+  #   updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
+  #   updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+  # })
   
   observeEvent(input$rest.covar,{
     if(input$rest.covar==F){
@@ -176,9 +199,8 @@ server <- function(input, output, session) {
                                batchID = values$batch.col)
     
     # helper text
-    output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. Merged data preview:")
-    output$text.merge.lower <- renderText("If everything seems in order, move to the next step.")
-    
+    output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. If everything seems in order, move to the next step.")
+
     # preview
     merged.preview <- values$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
     output$data.merge <- renderDataTable({merged.preview}, options = list(pageLength = 10))
@@ -306,7 +328,6 @@ server <- function(input, output, session) {
         need(!is.null(prepro.description), message = "This is not yet available. See future Updates for a detailed description.")
       )
     })
-    
   }) # end of prepro
   
   # Correlation Check -------------------------------------------------------
@@ -420,8 +441,13 @@ server <- function(input, output, session) {
       )
     })
     
+    # return success message
+    output$uni.success.text <- renderText({
+      "Univariable associations calculated successfully. See the Plot-tab for a visualization and the Results-tab for the association statistics."
+    })
+    
     message("Finishing")
-  })
+  }) # End univariable association
   
   # download data
   output$download.uni <- downloadHandler(
@@ -430,7 +456,7 @@ server <- function(input, output, session) {
       fwrite(isolate(values$res.univar), file)
     }
   )
-  
+
   # Exlude covariates -------------------------------------------------------
   # pressing exclude button
   observeEvent(input$corr.exclude.button,{
@@ -496,7 +522,13 @@ server <- function(input, output, session) {
     })
     
     message("Finishing")
-  })
+    
+    # return success message
+    output$multi.success.text <- renderText({
+      "Multivariable associations calculated successfully. See the Results-tab for the association statistics."
+    })
+    
+  }) # end multivariable association
   
   # download data
   output$download.multi <- downloadHandler(
