@@ -16,8 +16,7 @@ runGitHub("Metabolite-Investigator", "cfbeuchel")
 ```
 
 The App comes with example data from two cohorts that may be used to try out
-the functionality. However, the data is currently not available online. Until
-then, the `Use Example Data` button will remain without function. 
+the functionality. Press the `Use Example Data` button to load the data and try out the application. 
 
 ## Requirements
 
