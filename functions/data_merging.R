@@ -8,18 +8,6 @@ data_merging <- function(
   cohortID,
   batchID) {
   
-  # tests #TODO#
-  # if(any(sapply(c(covariateData,
-  #                covariateID,
-  #                covariateColumns,
-  #                metaboliteData,
-  #                metaboliteID,
-  #                metaboliteColumns,
-  #                cohortID,
-  #                batchID), missing))){
-  #   stop("Not all necessary variables defined!")
-  # }
-  
   # define covariate & metabolite ID column to merge by
   covar.id <- covariateID #USER_INPUT#
   metab.id <- metaboliteID #USER_INPUT#
@@ -28,22 +16,7 @@ data_merging <- function(
   cohort.col <- cohortID #USER_INPUT#
   batch.col <- batchID #USER_INPUT#
   m.cols <- metaboliteColumns #USER_INPUT#
-  # c("Gln", "Lys", "OHProl", "PiPA", "Aba", "Ala", "Arg", "Asn", 
-  #           "Asp", "Carnosin", "Cit", "Glu", "Gly", "His", "LeuIle", "MeHis", 
-  #           "Met", "Orn", "Phe", "Pro", "Sarc", "Ser", "Tau", "Thr", "Trp", 
-  #           "Tyr", "Val", "C0", "C2", "C3", "C3DC", "C4", "C4OH", "C5", "C5OHHMG", 
-  #           "C51", "C6", "C6DC", "C8", "C81", "C10", "C101", "C12", "C14", 
-  #           "C141", "C14OH", "C16", "C161", "C161OH", "C16OH", "Glut", "MeGlut", 
-  #           "MMA", "C18", "C181", "C181OH", "C182", "C182OH", "C18OH", "C201", 
-  #           "C202", "C203", "acges")
   c.cols <- covariateColumns #USER_INPUT#
-  # c("age", "sex", "log.bmi", "diabetes.status.tri", "diabetes.anamnese", 
-  #           "diabetes.medication", "hba1c.percent", "smoking.status", "whr", 
-  #           "bp.sys", "bp.dia", "pulse.pressure", "atc.code.g03", "cholesterol", 
-  #           "ldl.cholesterol", "hdl.cholesterol", "white.blood.cells", "lymphocytes.percent", 
-  #           "monocytes.percent", "hematocrit", "platelets", "reticulocytes", 
-  #           "neutrophils.percent", "erythrocytes", "basophils.percent", "eosinophils.percent", 
-  #           "blood.hemoglobin.level", "atc.code.c10")
   
   # turn into DT in case it isn't one
   setDT(input.covar)
@@ -55,7 +28,7 @@ data_merging <- function(
   
   # merge my seperate data into test data
   id.overlap <- intersect(input.covar$id, input.metab$id)
-  message(paste0("Matching unique ID overlap for ", uniqueN(id.overlap), " samples found in metabolite and covariate data."))
+  merge.message <- paste0("Matching unique ID overlap for ", uniqueN(id.overlap), " samples found in metabolite and covariate data.")
   m.ordered <- match(id.overlap, input.metab$id)
   c.ordered <- match(id.overlap, input.covar$id)
   
@@ -98,5 +71,6 @@ data_merging <- function(
   dat[, (c.cols[c.continuous])  := lapply(.SD, as.numeric), .SDcols = c.cols[c.continuous]]
   
   # return results
-  return(dat)
+  return(list(dat = dat,
+              message = merge.message))
 }

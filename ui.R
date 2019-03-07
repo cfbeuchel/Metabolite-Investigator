@@ -1,8 +1,7 @@
 # Define UI for application that draws a histogram
 ui <- navbarPage("Analysis Steps",
                  position = "static-top",
-                 #TAG# Download button coloring
-                 # Panels
+                 #=== Panels ===#
                  tabPanel("Description", {
                  tags$head(tags$style(".butt{background-color:#add8e6;} .butt{color: white;}"))
                    sidebarLayout(
@@ -13,7 +12,7 @@ ui <- navbarPage("Analysis Steps",
                        tags$hr(),
                        helpText(strong("To ensure full functionality, please execute all steps in order."))
                      ),
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Analysis Steps"),
                        tags$hr(),
                        h4("Step 1 - Upload of metabolite and covariate data"),
@@ -117,7 +116,7 @@ covariate model for subsequent analysis. This method allows for conservative
                                     selected = '"')
                      ), # END Sidebar panel
                      
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Upload covariate & metabolite files"),
                        tags$hr(),
                        verbatimTextOutput("preview.text"),
@@ -158,9 +157,10 @@ covariate model for subsequent analysis. This method allows for conservative
                        selectInput("metab.col", "Select All Metabolite Columns", choices = NULL, multiple = T), # no choices before uploading
                        selectInput("covar.col", "Select All Covariate Columns", choices = NULL, multiple = T) # no choices before uploading
                      ),
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Data merging and pre-processing"),
                        tags$hr(),
+                       verbatimTextOutput("text.found.overlap"),
                        verbatimTextOutput("text.merge.upper"),
                        dataTableOutput("data.merge")
                      )
@@ -177,7 +177,7 @@ covariate model for subsequent analysis. This method allows for conservative
                                      "Pre-Process metabolites?",
                                      value = T)
                      ), 
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Data pre-processing"),
                        tags$hr(),
                        verbatimTextOutput("prepro.success"),#TAG#
@@ -212,7 +212,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        helpText("Download Univariable Association Results:"),
                        downloadButton("download.uni", "Download", class = "butt")
                      ),
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Univariable Covariate Association"),
                        tags$hr(),
                        verbatimTextOutput("uni.success.text"),
@@ -252,7 +252,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        selectInput(inputId = "exclude.corr.select", label = "Exclude Correlating Covariates", multiple = T, choices = NULL),
                        actionButton(inputId = "corr.exclude.button", label = "Exclude Factors", icon = icon("play-circle"))
                      ),
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Correlation Check"),
                        tags$hr(),
                        verbatimTextOutput("high.corr"),
@@ -283,7 +283,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        helpText("Download Multivariable Association Results:"),
                        downloadButton("download.multi", "Download", class = "butt")
                      ),
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Multivariable Covariate Association"),
                        tags$hr(),
                        verbatimTextOutput("multi.success.text"),
@@ -366,7 +366,7 @@ covariate model for subsequent analysis. This method allows for conservative
                          downloadButton("download.annot.c", "Download", class = "butt")
                        ) # conditionalPanel
                      ), # sidebarPanel
-                     mainPanel(width = 5,
+                     mainPanel(width = 6,
                        h3("Covariate Selection"),
                        tags$hr(),
                        verbatimTextOutput("covar.select.start"),

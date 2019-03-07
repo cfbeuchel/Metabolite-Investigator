@@ -7,23 +7,16 @@ server <- function(input, output, session) {
   # for storage
   values <- reactiveValues()
   
-  # create example data
-  example.dat <- reactive({
+  # show example data
+  output$preview.example <- renderDataTable({
     data.table(id = paste0("Sample_", 1:12),
                cohort = paste0("cohort_", rep(c("a", "b"), each = 6)),
                batch = paste0("batch_", rep(1:3, each = 2)),
                metabolite.1 = rnorm(12),
                metabolite.2 = rnorm(12),
                metabolite.3 = rnorm(12))
-  })
-  
-  # show example data
-  output$preview.example <- renderDataTable({
-    example.dat <- example.dat()
-      example.dat
   }, options = list(pageLength = 10))
   
-
   # Example Data ------------------------------------------------------------
   observeEvent(input$use.example, {
     
@@ -35,18 +28,11 @@ server <- function(input, output, session) {
     )
     
     # metab 
-    input.metab <- reactiveVal(
-      fread("data/exampleMetaboliteDat.csv")
-    )
-    
-    values$input.metab <- input.metab()
+    values$input.metab <- (fread("data/exampleMetaboliteDat.csv"))
     output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
     # covar
-    input.covar <- reactiveVal(
-      fread("data/exampleCovariateDat.csv"))
-        
-    values$input.covar <- input.covar()
+    values$input.covar <- (fread("data/exampleCovariateDat.csv"))
     output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
     # Mergin buttons
@@ -92,19 +78,13 @@ server <- function(input, output, session) {
     )
   }, options = list(pageLength = 10))
   
-  # observeEvent(input$input.covar, {
-  #   values$input.covar <- (fread(input$input.covar$datapath, sep=input$sep.covar))
-  # })
-  # observeEvent(input$input.metab, {
-  #   values$input.metab <- (fread(input$input.metab$datapath, sep=input$sep.metab))
-  # })
-  
-  # column button
+
+  # Upload Metabolites ------------------------------------------------------
   observeEvent({
     input$input.metab
   },{
     # upload data
-    values$input.metab <- (fread(input$input.metab$datapath, sep=input$sep.metab))
+    values$input.metab <- fread(input$input.metab$datapath, sep=input$sep.metab)
     
     # Update select input immediately after clicking on the action button.
     updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
@@ -115,7 +95,8 @@ server <- function(input, output, session) {
     output$metab.upload.success <- renderText("Metabolite data uploaded successfully. Please make sure it is the right data.")
   })
   
-  # oberve Covar Upload
+
+  # Upload Covariates -------------------------------------------------------
   observeEvent({
     input$input.covar
   },{
@@ -129,15 +110,7 @@ server <- function(input, output, session) {
     output$covar.upload.success <- renderText("Covariate data uploaded successfully. Please make sure it is the right data.")
   })
   
-  # observeEvent(input$use.example,{
-  #   
-  #   # Update select input immediately after clicking on the action button.
-  #   updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
-  #   updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
-  #   updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
-  #   updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
-  # })
-  
+  # Covariate/Metabolite column selection -----------------------------------
   observeEvent(input$rest.covar,{
     if(input$rest.covar==F){
       updateSelectInput(session,
@@ -156,6 +129,8 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  # Data Merging -----------------------------------
   # rename metab/covar columns
   observeEvent(input$merge.button,{
     
@@ -182,22 +157,25 @@ server <- function(input, output, session) {
     }
     
     # valid selection of columns
+    output$data.merge <- renderDataTable({
     validate(
-      need(any(duplicated(c(values$cohort.col,
+      need(any(identical(c(values$cohort.col,
                             values$batch.col,
                             values$m.cols))) != T, "Batch and Cohort ID cannot be identical. Please review your selection.")
     )
+    }, options = list(pageLength = 10))
     
     # Merging -----------------------------------------------------------------
-    values$dat <- data_merging(covariateData = values$input.covar,
-                               metaboliteData = values$input.metab,
-                               covariateID = values$covar.id,
-                               metaboliteID = values$metab.id,
-                               covariateColumns = values$c.cols,
-                               metaboliteColumns = values$m.cols,
-                               cohortID = values$cohort.col,
-                               batchID = values$batch.col)
-    
+    results <- data_merging(covariateData = values$input.covar,
+                            metaboliteData = values$input.metab,
+                            covariateID = values$covar.id,
+                            metaboliteID = values$metab.id,
+                            covariateColumns = values$c.cols,
+                            metaboliteColumns = values$m.cols,
+                            cohortID = values$cohort.col,
+                            batchID = values$batch.col)
+    values$dat <- results[["dat"]]
+    output$text.found.overlap <- renderText(results[["message"]])
     # helper text
     output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. If everything seems in order, move to the next step.")
 
