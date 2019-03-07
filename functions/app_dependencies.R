@@ -3,7 +3,6 @@ for (i in c(
   "data.table",
   "sva",
   "shiny",
-  "corrplot",
   "ggplot2",
   "scales"
 )) {

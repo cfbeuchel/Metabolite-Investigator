@@ -27,6 +27,5 @@ packages:
 * data.table (install via CRAN - `install.packages("data.table")`)
 * sva (install via
   [Bioconductor](https://bioconductor.org/packages/release/bioc/html/sva.html))
-* corrplot (install via CRAN - `install.packages("corrplot")`)
 * ggplot2 (install via CRAN - `install.packages("ggplot2")`)
 * scales (install via CRAN - `install.packages("scales")`)

@@ -259,7 +259,12 @@ covariate model for subsequent analysis. This method allows for conservative
                        tabsetPanel(type = "tabs",
                                    tabPanel("Correlation", plotOutput("correlation.plot",
                                                                       width = "auto",
-                                                                      height = "700px")),
+                                                                      # base plot height on number of covariates
+                                                                      height = ifelse(
+                                                                        length(
+                                                                          values$c.cols) <= 10,
+                                                                        paste0(length(values$c.cols)*100, "px"),
+                                                                        "1000px"))), #  "700px"
                                    tabPanel("Covariate Annotation", dataTableOutput("preview.corr.annot.c"))
                        )
                      )  

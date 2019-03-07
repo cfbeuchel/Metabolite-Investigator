@@ -22,36 +22,7 @@ show_highly_correlating <- function(
         ], use = "pairwise"
     )
     
-    # Plot correlation
-    p.mat <- cor.mtest(dat[
-      cohort == (x),
-      lapply(.SD, as.numeric),
-      .SDcols = c(c.cols)
-      ])$p
-    
-    # col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
-    # # plot
-    # corrplot(M,
-    #          method = "color",
-    #          col = col(200),
-    #          type = "upper",
-    #          # order = "hclust",
-    #          addCoef.col = "black", # Add coefficient of correlation
-    #          tl.col = "black",
-    #          title = paste0("Pairwise Pearsons' correlation of ", x, " metabolites."),
-    #          tl.srt = 45, # Text label color and rotation
-    #          # tl.pos = "d",
-    #          p.mat = p.mat, # Combine with significance
-    #          sig.level = 0.01,
-    #          insig = "blank", # hide correlation coefficient on the principal diagonal
-    #          diag = FALSE,
-    #          mar = c(0,0,2,0)
-    #          # number.cex = 15/nrow(M),
-    #          # tl.cex = 20/nrow(M)
-    # )
-    
     # get all covariates correlating above the set threshold
-    
     diag(M) <- 0
     M <- as.data.frame(M)
     setDT(M, keep.rownames = T)
