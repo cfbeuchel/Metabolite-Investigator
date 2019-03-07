@@ -1,3 +1,15 @@
+# check for installed packages and install them if necessary
+installed <- installed.packages()
+needed <- c("data.table","sva","shiny","ggplot2","scales")
+to.install <- needed[!(needed %in% installed[,1])]
+if(length(to.install)!=0){
+  if("sva" %in% to.install){
+    install.packages("BiocManager")
+    BiocManager::install("sva")
+  }
+  install.packages(to.install[to.install!="sva"], repos = "https://cran.uni-muenster.de/")
+}
+
 # load required packages
 for (i in c(
   "data.table",

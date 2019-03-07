@@ -257,14 +257,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        tags$hr(),
                        verbatimTextOutput("high.corr"),
                        tabsetPanel(type = "tabs",
-                                   tabPanel("Correlation", plotOutput("correlation.plot",
-                                                                      width = "auto",
-                                                                      # base plot height on number of covariates
-                                                                      height = ifelse(
-                                                                        length(
-                                                                          values$c.cols) <= 10,
-                                                                        paste0(length(values$c.cols)*100, "px"),
-                                                                        "1000px"))), #  "700px"
+                                   tabPanel("Correlation", plotOutput("correlation.plot", width = "400px")), #  "700px" 
                                    tabPanel("Covariate Annotation", dataTableOutput("preview.corr.annot.c"))
                        )
                      )  
@@ -352,7 +345,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        ),
                        # sidebarPanel(width = 3,
                        conditionalPanel(
-                         condition = "input.ChangeBasedOnThis != 'Plot' || input.ChangeBasedOnThis != 'Description'",
+                         condition = "input.ChangeBasedOnThis != 'Plot' && input.ChangeBasedOnThis != 'Description'",
                          helpText("Download the results of the analysis here:"),
                          tags$hr(),
                          helpText("Download Relevant Covariates:"),

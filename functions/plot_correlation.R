@@ -53,7 +53,7 @@ plot_correlation <- function(data, cohort, covariates){
           axis.text.y = element_text(size = 13)) +
     coord_fixed()
   
-  ggheatmap +
+  plot.results <- ggheatmap +
     geom_text(aes(Var2, Var1, label = round(value, 3)), color = "black", size = 4) +
     theme(
       axis.title.x = element_blank(),
@@ -62,5 +62,7 @@ plot_correlation <- function(data, cohort, covariates){
       panel.border = element_blank(),
       panel.background = element_blank(),
       axis.ticks = element_blank()
-      )
+    )
+  
+  return(plot.results)
 }

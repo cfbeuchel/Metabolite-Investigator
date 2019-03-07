@@ -65,7 +65,7 @@ pre_process_metabolites <- function(
     
     # apply to data
     dat[, (m.cols) := lapply(.SD, function(x){
-      inverse_normal_transform(x)
+      x <- inverse_normal_transform(x)
       return(x)
     }), .SDcols = m.cols, by = cohort]
     

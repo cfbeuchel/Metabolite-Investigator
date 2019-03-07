@@ -22,17 +22,17 @@ server <- function(input, output, session) {
     
     # check for files
     validate(
-      need(expr = file.exists("data/exampleCovariateDat.csv") & 
-             file.exists("data/exampleMetaboliteDat.csv"),
+      need(expr = file.exists("data/190307_simu_metabs.csv") & 
+             file.exists("data/190307_simu_factors.csv"),
            message = "No example data found! Will be uploaded soon.")
     )
     
     # metab 
-    values$input.metab <- (fread("data/exampleMetaboliteDat.csv"))
+    values$input.metab <- (fread("data/190307_simu_metabs.csv"))
     output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
     # covar
-    values$input.covar <- (fread("data/exampleCovariateDat.csv"))
+    values$input.covar <- (fread("data/190307_simu_factors.csv"))
     output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
     # Mergin buttons
@@ -43,7 +43,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
     
     # output some text when using example data
-    output$preview.text <- renderText({"Using example data (2 cohorts with each 500 samples, 5 metabolites and 4 covariates) for analysis."})
+    output$preview.text <- renderText({"Using example data (2 cohorts with each 5000 samples, 7 metabolites and 6 factors) for analysis."})
   })
   
   # preview covar data
@@ -159,7 +159,8 @@ server <- function(input, output, session) {
     # valid selection of columns
     output$data.merge <- renderDataTable({
     validate(
-      need(any(identical(c(values$cohort.col,
+      need(any(duplicated(c(values$metab.id,
+                           values$cohort.col,
                             values$batch.col,
                             values$m.cols))) != T, "Batch and Cohort ID cannot be identical. Please review your selection.")
     )
@@ -174,8 +175,11 @@ server <- function(input, output, session) {
                             metaboliteColumns = values$m.cols,
                             cohortID = values$cohort.col,
                             batchID = values$batch.col)
+    
+    # re-assign
     values$dat <- results[["dat"]]
     output$text.found.overlap <- renderText(results[["message"]])
+    
     # helper text
     output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. If everything seems in order, move to the next step.")
 
@@ -377,10 +381,21 @@ server <- function(input, output, session) {
     cohort <- input$plot.corr.select
     dat <- isolate(values$dat)
     c.cols <- isolate(values$c.cols)
-    output$correlation.plot <- renderPlot(plot_correlation(data = dat,
-                                                           covariates = c.cols,
-                                                           cohort = cohort))
+    # plot.height <- ifelse(
+    #   uniqueN(c.cols) <= 10,
+    #   paste0(uniqueN(c.cols)*100, "px"),
+    #   "1000px")
+    
+    output$correlation.plot <- renderPlot(
+      plot_correlation(
+        data = dat,
+        covariates = c.cols,
+        cohort = cohort)# ,
+      # width = plot.height,
+      # height = plot.height
+      )
   })
+  
   
   # Univariable Association -------------------------------------------------
   observeEvent(input$univar.assoc.button, {
