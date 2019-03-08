@@ -65,7 +65,7 @@ network_plot <- function(assocResults,
   visNetwork(
     knoten2,
     ecken2,
-    hight = "100%",
+    height = "100%",
     width = "100%") %>%
     visHierarchicalLayout(sortMethod="directed") %>%
     visNodes(font= '18px arial black') %>%
@@ -79,7 +79,7 @@ network_plot <- function(assocResults,
   visNetwork(
     knoten2,
     ecken2,
-    hight = "100%",
+    height = "100%",
     width = "100%") %>%
     visLayout(randomSeed = 12) %>%
     visNodes(font= '18px arial black') %>%
