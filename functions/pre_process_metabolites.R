@@ -165,8 +165,9 @@ pre_process_metabolites <- function(
         # loop through non-ComBat-adjustable batches and adjust in LM
         lapply(failed.metabs, function(y){
           
+          # y <- failed.metabs[1]
           metab.formula <- as.formula(paste0(y, " ~ batch"))
-          metab.lm <- lm(metab.formula, data = dat)
+          metab.lm <- lm(metab.formula, data = dat[cohort %in% (x), ])
           
           # transform residuals back into right scale
           res.1 <- metab.lm$residual

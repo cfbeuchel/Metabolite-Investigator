@@ -1,9 +1,9 @@
 # Define UI for application that draws a histogram
+tags$head(tags$style(".butt{background-color:#add8e6;} .butt{color: white;}"))
 ui <- navbarPage("Analysis Steps",
                  position = "static-top",
                  #=== Panels ===#
                  tabPanel("Description", {
-                 tags$head(tags$style(".butt{background-color:#add8e6;} .butt{color: white;}"))
                    sidebarLayout(
                      sidebarPanel(width = 3,
                        helpText("This is a general description of the analysis steps taken in this application.
@@ -12,7 +12,7 @@ ui <- navbarPage("Analysis Steps",
                        tags$hr(),
                        helpText(strong("To ensure full functionality, please execute all steps in order."))
                      ),
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Analysis Steps"),
                        tags$hr(),
                        h4("Step 1 - Upload of metabolite and covariate data"),
@@ -116,7 +116,7 @@ covariate model for subsequent analysis. This method allows for conservative
                                     selected = '"')
                      ), # END Sidebar panel
                      
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Upload covariate & metabolite files"),
                        tags$hr(),
                        verbatimTextOutput("preview.text"),
@@ -157,7 +157,7 @@ covariate model for subsequent analysis. This method allows for conservative
                        selectInput("metab.col", "Select All Metabolite Columns", choices = NULL, multiple = T), # no choices before uploading
                        selectInput("covar.col", "Select All Covariate Columns", choices = NULL, multiple = T) # no choices before uploading
                      ),
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Data merging and pre-processing"),
                        tags$hr(),
                        verbatimTextOutput("text.found.overlap"),
@@ -175,9 +175,12 @@ covariate model for subsequent analysis. This method allows for conservative
                        helpText("Please choose whether you want the metabolites pre-processed or not:"),
                        checkboxInput("button.choose.prepro",
                                      "Pre-Process metabolites?",
-                                     value = T)
+                                     value = T),
+                       tags$hr(),
+                       helpText("Download Preprocessed Data:"),
+                       downloadButton("download.dat", "Download", class = "butt")
                      ), 
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Data pre-processing"),
                        tags$hr(),
                        verbatimTextOutput("prepro.success"),#TAG#
@@ -209,10 +212,17 @@ covariate model for subsequent analysis. This method allows for conservative
                                                   "hierarchical Bonferroni" = "hierarchical.bf"),
                                    selected = "hierarchical.bf"),
                        tags$hr(),
+                       selectInput(inputId = "network.uni.select",
+                                   label = "Display bi-partite Network for",
+                                   choices = NULL),
+                       checkboxInput(inputId = "network.uni.hierarch",
+                                     label = "Hierarchical Network",
+                                     value = T),
+                       tags$hr(),
                        helpText("Download Univariable Association Results:"),
                        downloadButton("download.uni", "Download", class = "butt")
                      ),
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Univariable Covariate Association"),
                        tags$hr(),
                        verbatimTextOutput("uni.success.text"),
@@ -223,6 +233,7 @@ covariate model for subsequent analysis. This method allows for conservative
                                             tags$hr(),
                                             textOutput("univar.description")),
                                    tabPanel("Plot", plotOutput("plot.univar", width = "70%")),
+                                   tabPanel("Network", visNetworkOutput("network.univar")),
                                    tabPanel("Results", dataTableOutput("res.univar"))
                        )
                      )
@@ -250,9 +261,9 @@ covariate model for subsequent analysis. This method allows for conservative
                        tags$hr(),
                        helpText("This panel automatically displays only covariates that correlate above the specified cutoff. This step can be omitted."),
                        selectInput(inputId = "exclude.corr.select", label = "Exclude Correlating Covariates", multiple = T, choices = NULL),
-                       actionButton(inputId = "corr.exclude.button", label = "Exclude Factors", icon = icon("play-circle"))
+                       actionButton(inputId = "corr.exclude.button", label = "Reset Factor Exclusion", icon = icon("redo"))
                      ),
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Correlation Check"),
                        tags$hr(),
                        verbatimTextOutput("high.corr"),
@@ -278,10 +289,17 @@ covariate model for subsequent analysis. This method allows for conservative
                                                   "hierarchical Bonferroni" = "hierarchical.bf"),
                                    selected = "hierarchical.bf"),
                        tags$hr(),
+                       selectInput(inputId = "network.multi.select",
+                                   label = "Display bi-partite Network for",
+                                   choices = NULL),
+                       checkboxInput(inputId = "network.multi.hierarch",
+                                     label = "Hierarchical Network",
+                                     value = T),
+                       tags$hr(),
                        helpText("Download Multivariable Association Results:"),
                        downloadButton("download.multi", "Download", class = "butt")
                      ),
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Multivariable Covariate Association"),
                        tags$hr(),
                        verbatimTextOutput("multi.success.text"),
@@ -291,6 +309,8 @@ covariate model for subsequent analysis. This method allows for conservative
                                             h4("Methods Description"),
                                             tags$hr(),
                                             textOutput("multivar.description")),
+                                   tabPanel("Plot", plotOutput("plot.multivar", width = "70%")),
+                                   tabPanel("Network", visNetworkOutput("network.multivar")),
                                    tabPanel("Results", dataTableOutput("res.multivar"))
                        )
                      )
@@ -300,7 +320,7 @@ covariate model for subsequent analysis. This method allows for conservative
                    sidebarLayout(
                      sidebarPanel(width = 3,
                        conditionalPanel(
-                         condition = "input.ChangeBasedOnThis == 'Plot' || input.ChangeBasedOnThis == 'Description'",
+                         condition = "input.ChangeBasedOnThis == 'Plot/<br/>Settings' || input.ChangeBasedOnThis == 'Description/<br/>Settings'",
                          helpText("Press this button to start the covariable selection"),
                          actionButton(inputId = "start.selection.button", label = "Covariate Selection", icon = icon("play-circle")),
                          tags$hr(),
@@ -338,14 +358,12 @@ covariate model for subsequent analysis. This method allows for conservative
                          helpText("Select covariates that should be in the selection results mandatorily.
                                    Use this to select factors that you know are important and you want to include in a confounder model regardless
                                    of the variance it explains."),
-                         inputPanel(
                            selectInput(inputId = "mandatory.inclusion.selecter",
                                        label = "Mandatory Inclusions",
-                                       choices = NULL, multiple = T, selected = NULL))
-                       ),
+                                       choices = NULL, multiple = T, selected = NULL)),
                        # sidebarPanel(width = 3,
                        conditionalPanel(
-                         condition = "input.ChangeBasedOnThis != 'Plot' && input.ChangeBasedOnThis != 'Description'",
+                         condition = "input.ChangeBasedOnThis != 'Plot/<br/>Settings' && input.ChangeBasedOnThis != 'Description/<br/>Settings'",
                          helpText("Download the results of the analysis here:"),
                          tags$hr(),
                          helpText("Download Relevant Covariates:"),
@@ -354,9 +372,6 @@ covariate model for subsequent analysis. This method allows for conservative
                          helpText("Download Association Results:"),
                          downloadButton("download.all.multi", "Download", class = "butt"),
                          tags$hr(),
-                         helpText("Download Preprocessed Data:"),
-                         downloadButton("download.dat", "Download", class = "butt"),
-                         tags$hr(),
                          helpText("Download Metabolite Annotation:"),
                          downloadButton("download.annot.m", "Download", class = "butt"),
                          tags$hr(),
@@ -364,37 +379,37 @@ covariate model for subsequent analysis. This method allows for conservative
                          downloadButton("download.annot.c", "Download", class = "butt")
                        ) # conditionalPanel
                      ), # sidebarPanel
-                     mainPanel(width = 6,
+                     mainPanel(width = 5,
                        h3("Covariate Selection"),
                        tags$hr(),
                        verbatimTextOutput("covar.select.start"),
                        verbatimTextOutput("covar.select.stop"),
                        tabsetPanel(id = "ChangeBasedOnThis", 
-                                   tabPanel("Description", 
+                                   tabPanel(HTML("Description/<br/>Settings"), 
                                             tags$hr(),
                                             h4("Methods Description"),
                                             tags$hr(),
                                             textOutput("selection.description")),
-                                   tabPanel(title = "Plot",
+                                   tabPanel(HTML("Plot/<br/>Settings"),
                                             h4("Covariate Selection"),
                                             tags$hr(),
                                             plotOutput("multi.plot", hover = T, width = "70%")
                                    ),
-                                   tabPanel("Relevant Covariates",
+                                   tabPanel(HTML("Relevant<br/>Covariates"),
                                             h4("Your relevant covariates are:"),
                                             helpText("This table displays the maximum-partial-r-squared found per covariate per cohort that passed the set threshold."),
                                             tags$hr(),
                                             dataTableOutput("res.full.model")
                                    ),
-                                   tabPanel("Association Statistics", 
+                                   tabPanel(HTML("Association<br/>Statistics"), 
                                             h4("Association Statistics"),
                                             tags$hr(),
                                             dataTableOutput("res.all.multi")),
-                                   tabPanel("Metabolite Annotation",
+                                   tabPanel(HTML("Metabolite<br/>Annotation"),
                                             h4("Your Metabolite Annotation"),
                                             tags$hr(),
                                             dataTableOutput("res.annot.m")),
-                                   tabPanel("Covariate Annotation",
+                                   tabPanel(HTML("Covariate<br/>Annotation"),
                                             h4("Your Covariate Annotation"),
                                             tags$hr(),
                                             dataTableOutput("res.annot.c"))

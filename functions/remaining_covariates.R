@@ -33,7 +33,7 @@ remaining_covariates <- function(
   # loop through combinations
   add.r.squared <- lapply(all.plans$index, function(i){
     
-    # i <- 1 # debug
+    # i <- 4 # debug
     my.cohort <- all.plans[index == (i), cohort]
     my.add.term <- all.plans[index == (i), terms] # my additional term
     

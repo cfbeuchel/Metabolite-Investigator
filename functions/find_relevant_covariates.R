@@ -37,7 +37,8 @@ find_relevant_covariates <- function(
   }
   
   # create a column to mark mandatory inclusion
-  annot.c[, mandatory.inclusion := ifelse(covariate %in% (mandatory.inclusion), T, F)]
+  annot.inclusion <- annot.c$covariate %in% (mandatory.inclusion)
+  annot.c[, mandatory.inclusion := (annot.inclusion)]
   
   # loop through all r2 cutoffs selected
   all.pr2sel.res <- lapply(r.squared.cutoff, function(i){
@@ -130,7 +131,7 @@ find_relevant_covariates <- function(
     nev <- partial.max[
       max.r.squared <= (r.squared.cutoff)]
     
-    # lvc = low variance covariates
+    # lvc = low variance covariates in both cohorts?
     lvc <- nev[, .N, by = term][N == uniqueN(partial.max$cohort), term]
     
     if(length(lvc) == 0){
@@ -143,7 +144,7 @@ find_relevant_covariates <- function(
                 by = term
                 ]
     
-    # do not remove leucos & neutros!
+    # do not remove mandatory inclusion covars!
     cnr <- nev2[
       !(term %in% mandatory.inclusion),
       .(term = term[mean == min(mean)])

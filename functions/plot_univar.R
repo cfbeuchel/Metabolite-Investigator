@@ -1,4 +1,6 @@
-plot_univar <- function(data){
+plot_univar <- function(data, rSquaredCol){
+  
+  setnames(data, old = rSquaredCol, new = "r.squared", skip_absent = T)
   
   ggplot(data,
          aes(fill = cohort,

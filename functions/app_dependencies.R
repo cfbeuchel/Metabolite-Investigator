@@ -1,6 +1,16 @@
+# which packages do I need for this app
+necessary.packages <- c(
+  "data.table",
+  "sva",
+  "shiny",
+  "ggplot2",
+  "magrittr",
+  "visNetwork",
+  "scales")
+
 # check for installed packages and install them if necessary
 installed <- installed.packages()
-needed <- c("data.table","sva","shiny","ggplot2","scales")
+needed <- necessary.packages
 to.install <- needed[!(needed %in% installed[,1])]
 if(length(to.install)!=0){
   if("sva" %in% to.install){
@@ -11,13 +21,7 @@ if(length(to.install)!=0){
 }
 
 # load required packages
-for (i in c(
-  "data.table",
-  "sva",
-  "shiny",
-  "ggplot2",
-  "scales"
-)) {
+for (i in necessary.packages) {
   suppressPackageStartupMessages(library(i, character.only = TRUE))
 }
 
@@ -25,6 +29,7 @@ for (i in c(
 options(shiny.maxRequestSize=30*1024^2) 
 
 # Functions ---------------------------------------------------------------
+source("functions/network_plot.R")
 source("functions/plot_correlation.R")
 source("functions/multivariable_assoc.R")
 source("functions/univariable_assoc.R")

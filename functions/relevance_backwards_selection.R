@@ -102,7 +102,7 @@ relevance_backwards_selection <- function(rSquaredCutoff,
     old.confounders.list <- new.confounders.list
     
     # get the max r2 for each term in each cohort
-    melt.max.res <- all.res[ , .(max.r.squared = max(term.r.squared, na.rm = T)), by = .(cohort, term)]
+    melt.max.res <- all.res[!is.na(term) , .(max.r.squared = max(term.r.squared, na.rm = T)), by = .(cohort, term)]
     
     # change -Inf to NA
     change_in_dt(dat = melt.max.res, from = -Inf, to = NA, change_in_dat = T)

@@ -295,6 +295,8 @@ server <- function(input, output, session) {
     
     # update selector for correlation
     updateSelectInput(session, "plot.corr.select","Display Correlation in Cohort", choices = unique(dat$cohort))
+    updateSelectInput(session, "network.uni.select","Display bi-partite Network for", choices = unique(dat$cohort))
+    updateSelectInput(session, "network.multi.select","Display bi-partite Network for", choices = unique(dat$cohort))
     
     # re-enter values into reactive
     values$annot.m <- annot.m
@@ -302,6 +304,7 @@ server <- function(input, output, session) {
     values$dat <- dat
     values$m.cols <- m.cols
     values$c.cols <- c.cols
+    values$c.cols.original <- c.cols
     
     prepro.description <- NULL
     
@@ -311,6 +314,81 @@ server <- function(input, output, session) {
       )
     })
   }) # end of prepro
+  
+  # Univariable Association -------------------------------------------------
+  observeEvent(input$univar.assoc.button, {
+    
+    message("Starting")
+    
+    # input
+    dat <- isolate(values$dat)
+    annot.c <- isolate(values$annot.c)
+    m.cols <- isolate(values$m.cols)
+    c.cols <- isolate(values$c.cols)
+    multiple.testing <- isolate(input$univar.multiple.testing.correction.selecter)
+    
+    # compute univariable association results
+    res.univar <- univariable_assoc(dometab = m.cols,
+                                    docovar = c.cols,
+                                    data = dat)
+    
+    res.univar <- generic_multiple_testing_correction(
+      data = res.univar,
+      correctionMethod = multiple.testing)
+    
+    # annotate significance
+    p.col <- tail(names(res.univar), 1)
+    sig.factors <- res.univar[, .(sig = base::min(.SD) < 0.05,
+                                  min.p = base::min(.SD)) ,by = .(term, cohort), .SDcols = p.col]
+    annot.c[, tmp:=paste0(cohort, "_", covariate)]
+    sig.factors[, tmp:=paste0(cohort, "_", term)]
+    annot.c[match(sig.factors$tmp, tmp), univariable.min.p := sig.factors$min.p]
+    annot.c[match(sig.factors$tmp, tmp), univariable.significant.p.0.05 := sig.factors$sig]
+    annot.c$tmp <- NULL
+    
+    # built univariable network
+    output$network.univar <- renderVisNetwork({
+      
+      # construct network plot
+      network_plot(assocResults = copy(res.univar),
+                   rSquaredColumn = "r.squared",
+                   pColumn = p.col,
+                   cohort = input$network.uni.select,
+                   hierarchicalNetwork = input$network.uni.hierarch)})
+    
+    # plot the unviaraiable results
+    output$plot.univar <- renderPlot({plot_univar(data = res.univar, rSquaredCol = "r.squared")})
+    
+    # save results for output
+    output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
+    values$res.univar <- res.univar
+    values$annot.c <- annot.c
+    
+    # placeholder
+    univar.description <- NULL
+    
+    # output methods text
+    output$univar.description <- renderText({
+      validate(
+        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+      )
+    })
+    
+    # return success message
+    output$uni.success.text <- renderText({
+      "Univariable associations calculated successfully. See the Plot-tab for a visualization and the Results-tab for the association statistics."
+    })
+    
+    message("Finishing")
+  }) # End univariable association
+  
+  # download data
+  output$download.uni <- downloadHandler(
+    filename = "Univariable_Association_Results.csv",
+    content = function(file) {
+      fwrite(isolate(values$res.univar), file)
+    }
+  )
   
   # Correlation Check -------------------------------------------------------
   # observe Slider and take values
@@ -352,7 +430,7 @@ server <- function(input, output, session) {
         ". No problem found. ")
     }
     output$high.corr <- renderText({corr.message})
-    updateSelectInput(session, inputId = "exclude.corr.select", choices = high.corr)
+    updateSelectInput(session, inputId = "exclude.corr.select", choices = c(NULL, high.corr)) #TAG#
     
     # create annotation in case no covariates correlate highly
     if(length(high.corr)==0){
@@ -381,78 +459,18 @@ server <- function(input, output, session) {
     cohort <- input$plot.corr.select
     dat <- isolate(values$dat)
     c.cols <- isolate(values$c.cols)
-    # plot.height <- ifelse(
-    #   uniqueN(c.cols) <= 10,
-    #   paste0(uniqueN(c.cols)*100, "px"),
-    #   "1000px")
     
     output$correlation.plot <- renderPlot(
       plot_correlation(
         data = dat,
         covariates = c.cols,
-        cohort = cohort)# ,
-      # width = plot.height,
-      # height = plot.height
-      )
+        cohort = cohort)
+    )
   })
   
-  
-  # Univariable Association -------------------------------------------------
-  observeEvent(input$univar.assoc.button, {
-    
-    message("Starting")
-    
-    # input
-    dat <- isolate(values$dat)
-    m.cols <- isolate(values$m.cols)
-    c.cols <- isolate(values$c.cols)
-    multiple.testing <- isolate(input$univar.multiple.testing.correction.selecter)
-    
-    # compute univariable association results
-    res.univar <- univariable_assoc(dometab = m.cols,
-                                    docovar = c.cols,
-                                    data = dat)
-    
-    res.univar <- generic_multiple_testing_correction(
-      data = res.univar,
-      correctionMethod = multiple.testing)
-    
-    # plot the unviaraiable results
-    output$plot.univar <- renderPlot({plot_univar(data = res.univar)})
-    
-    # save results for output
-    output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
-    values$res.univar <- res.univar
-    
-    # placeholder
-    univar.description <- NULL
-    
-    # output methods text
-    output$univar.description <- renderText({
-      validate(
-        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
-    
-    # return success message
-    output$uni.success.text <- renderText({
-      "Univariable associations calculated successfully. See the Plot-tab for a visualization and the Results-tab for the association statistics."
-    })
-    
-    message("Finishing")
-  }) # End univariable association
-  
-  # download data
-  output$download.uni <- downloadHandler(
-    filename = "Univariable_Association_Results.csv",
-    content = function(file) {
-      fwrite(isolate(values$res.univar), file)
-    }
-  )
-
   # Exlude covariates -------------------------------------------------------
   # pressing exclude button
-  observeEvent(input$corr.exclude.button,{
+  observeEvent(input$exclude.corr.select,{
     
     # input
     annot.m <- isolate(values$annot.m)
@@ -463,8 +481,6 @@ server <- function(input, output, session) {
     
     # get excludable covariates
     exclude.covariates <- isolate(input$exclude.corr.select)
-    
-    c.cols.old <- c.cols # backup
     c.cols <- c.cols[!(c.cols %in% exclude.covariates)]
     
     # annotation table entry "correlation.exclusion"
@@ -477,7 +493,22 @@ server <- function(input, output, session) {
     values$dat <- dat
     values$m.cols <- m.cols
     values$c.cols <- c.cols
+  })
+  
+  # reset correlation exclusion
+  observeEvent(input$corr.exclude.button,{
     
+    # get the full c.cols and the changed annotation
+    c.cols.original <- isolate(values$c.cols.original)
+    annot.c <- isolate(values$annot.c)
+    
+    # reset correlation annotation
+    annot.c[, correlation.exclusion := F]
+    output$preview.corr.annot.c <- renderDataTable(annot.c, options = list(pageLength = 10))
+    
+    # write values
+    values$c.cols <- c.cols.original
+    values$annot.c <- annot.c
   })
   
   # Multivariable Association -----------------------------------------------
@@ -486,6 +517,7 @@ server <- function(input, output, session) {
     message("Starting")
     
     # input
+    annot.c <- isolate(values$annot.c)
     dat <- isolate(values$dat)
     m.cols <- isolate(values$m.cols)
     c.cols <- isolate(values$c.cols)
@@ -500,12 +532,35 @@ server <- function(input, output, session) {
       data = res.multivar,
       correctionMethod = multiple.testing)
     
+    p.col <- tail(names(res.multivar), 1)
+    sig.factors <- res.multivar[, .(sig = base::min(.SD) < 0.05,
+                                    min.p = base::min(.SD)) ,by = .(term, cohort), .SDcols = p.col]
+    annot.c[, tmp:=paste0(cohort, "_", covariate)]
+    sig.factors[, tmp:=paste0(cohort, "_", term)]
+    annot.c[match(sig.factors$tmp, tmp), multivariable.min.p := sig.factors$min.p]
+    annot.c[match(sig.factors$tmp, tmp), multivariable.significant.p.0.05 := sig.factors$sig]
+    annot.c$tmp <- NULL
+    
+    # built multivariable network
+    output$network.multivar <- renderVisNetwork({
+      
+      # construct network plot
+      network_plot(assocResults = copy(res.multivar),
+                   rSquaredColumn = "term.r.squared",
+                   pColumn = p.col,
+                   cohort = input$network.multi.select,
+                   hierarchicalNetwork = input$network.multi.hierarch)})
+    
     # save results for output
     output$res.multivar <- renderDataTable(res.multivar, options = list(pageLength = 10))
     values$res.multivar <- res.multivar
+    values$annot.c <- annot.c
     
     # placeholder
     multivar.description <- NULL
+    
+    # plot the unviaraiable results
+    output$plot.multivar <- renderPlot({plot_univar(data = res.multivar, rSquaredCol = "term.r.squared")})
     
     # output methods text
     output$multivar.description <- renderText({

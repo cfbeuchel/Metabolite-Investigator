@@ -24,7 +24,7 @@ partial_r_squared <- function(cohort,
     r.squared.one.metab <- lapply(all.covars, function(my.covar){
       
       # my.metab <- all.metabs[1] # debug 
-      # my.covar <- all.covars[3] # debug 
+      # my.covar <- all.covars[5] # debug 
       
       # start by building the full and minus one model
       my.full.formula <- as.formula(
@@ -60,7 +60,7 @@ partial_r_squared <- function(cohort,
       res.single <- res[term %in% grep(pattern = (paste0("^", my.covar, "$")), x = res$term, value = T), ]
       
       if(nrow(res.single)!=1){
-        res.single <- res[term %in% grep(pattern = (paste0("^",my.covar, "[0-9]$")), x = res$term, value = T), ]
+        res.single <- res[term %in% grep(pattern = (paste0("^",my.covar, ".+$")), x = res$term, value = T), ]
         if(nrow(res)!=0){
           res.single <- res.single[p.value == min(p.value),]
         }

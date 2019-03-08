@@ -23,8 +23,10 @@ the functionality. Press the `Use Example Data` button to load the data and try 
 The app requires an up-to-date R installation as well as the following
 packages:
 
-* data.table (install via CRAN - `install.packages("data.table")`)
 * sva (install via
   [Bioconductor](https://bioconductor.org/packages/release/bioc/html/sva.html))
+* data.table (install via CRAN - `install.packages("data.table")`)
+* visNetwork (install via CRAN - `install.packages("visNetwork")`)
+* magrittr (install via CRAN - `install.packages("magrittr")`)
 * ggplot2 (install via CRAN - `install.packages("ggplot2")`)
 * scales (install via CRAN - `install.packages("scales")`)
