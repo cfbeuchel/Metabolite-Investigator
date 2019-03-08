@@ -12,6 +12,7 @@ necessary.packages <- c(
 installed <- installed.packages()
 needed <- necessary.packages
 to.install <- needed[!(needed %in% installed[,1])]
+rm(installed)
 if(length(to.install)!=0){
   if("sva" %in% to.install){
     install.packages("BiocManager")

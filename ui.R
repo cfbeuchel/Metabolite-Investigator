@@ -1,5 +1,7 @@
 # Define UI for application that draws a histogram
+library("visNetwork")
 tags$head(tags$style(".butt{background-color:#add8e6;} .butt{color: white;}"))
+
 ui <- navbarPage("Analysis Steps",
                  position = "static-top",
                  #=== Panels ===#
