@@ -27,7 +27,7 @@ show_highly_correlating <- function(
     M <- as.data.frame(M)
     setDT(M, keep.rownames = T)
     hc <- M[, lapply(.SD, function(i){
-      i >= correlation.cutoff
+      abs(i) >= correlation.cutoff
     }), by = rn]
     hc[, high.corr := rowSums(.SD), by = rn]
     high.corr <- hc[high.corr!=0, rn]
