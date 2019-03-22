@@ -33,7 +33,9 @@ addHierarchFDR <- function(pvalues,
   level2[,fdr_level2 := p.adjust(min_level1,method =fdrmethod_level2)]
   level2
   
-  data[,fdr_level2 := level2[toolboxH::match_hk(data$cats, level2$cats),fdr_level2]]
+  # dependency to toolboxH #TAG#
+  # data[,fdr_level2 := level2[toolboxH::match_hk(data$cats, level2$cats),fdr_level2]]
+  data[,fdr_level2 := level2[match(data$cats, level2$cats),fdr_level2]]
   
   global_fdr5_level_table = level2[fdr_level2 <= fdr2control]
   
