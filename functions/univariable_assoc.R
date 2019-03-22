@@ -61,7 +61,9 @@ univariable_assoc <- function(dometab, docovar, data){
                           r.squared = NA,
                           p.value = NA,
                           n = NA,
-                          comment = stringr::str_replace_all(as.character(cond), "\n", "  "))
+                          comment = gsub(x = as.character(cond),
+                                         pattern = "\n",
+                                         replacement = " "))
         return(res)
       }
     ) # End of tryCatch()
