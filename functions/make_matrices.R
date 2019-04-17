@@ -7,7 +7,7 @@ make_matrices <- function(st2,
   st2[,significant:=pHierBonf<=0.05]
   st2[,.N,significant]
   
-  setnames(x = st2, old = c(r2Col, pCol), new = c("r2Col", "pCol"))
+  setnames(x = st2, old = c(r2Col, pCol), new = c("r2Col", "pCol"), skip_absent = T)
   
   st2max = st2[,.( maxR2            = max(r2Col, na.rm = T),
                    maxIsSignificant = significant[r2Col==max(r2Col)][1],

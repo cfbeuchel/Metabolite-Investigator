@@ -336,6 +336,15 @@ server <- function(input, output, session) {
       data = res.univar,
       correctionMethod = multiple.testing)
     
+    # friedman/wilcoxon test for r2 difference
+    r2.test <- test_r2_distribution(dat = res.univar,
+                         r2Col = "r.squared")
+    
+    # add friedman/wilcoxon results to factor annotation
+    r2.test.matched <- match(annot.c$covariate, r2.test$term)
+    r2.test.join <- r2.test[(r2.test.matched), .SD, .SDcols = names(r2.test)[-1]]
+    annot.c[, paste0("univar.", names(r2.test.join)) := r2.test.join]
+    
     # annotate significance
     p.col <- tail(names(res.univar), 1)
     sig.factors <- res.univar[, .(sig = base::min(.SD) < 0.05,
@@ -553,6 +562,16 @@ server <- function(input, output, session) {
       data = res.multivar,
       correctionMethod = multiple.testing)
     
+    # friedman/wilcoxon test for r2 difference
+    r2.test <- test_r2_distribution(dat = res.multivar,
+                                    r2Col = "term.r.squared")
+
+    # # add friedman/wilcoxon results to factor annotation
+    r2.test.matched <- match(annot.c$covariate, r2.test$term)
+    r2.test.join <- r2.test[(r2.test.matched), .SD, .SDcols = names(r2.test)[-1]]
+    annot.c[, paste0("multivar.", names(r2.test.join)) := r2.test.join]
+    
+    # some formatting
     p.col <- tail(names(res.multivar), 1)
     sig.factors <- res.multivar[, .(sig = base::min(.SD) < 0.05,
                                     min.p = base::min(.SD)) ,by = .(term, cohort), .SDcols = p.col]
