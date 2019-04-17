@@ -7,7 +7,7 @@ sd_filter_vector <- function(x) {
   scaled.x <- scale(log.x, center = T, scale = T)
   
   # set the filter
-  filter.ok <- ifelse((scaled.x <= 5 & scaled.x >= -5) | is.na(scaled.x), T, F)
+  filter.ok <- ifelse((scaled.x <= 5) | is.na(scaled.x), T, F)
   
   # in case of NA set filter to F
   filter.ok[is.na(filter.ok)] <- F

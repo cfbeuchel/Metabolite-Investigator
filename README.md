@@ -2,8 +2,25 @@
 
 ## Quick-Start
 
-This is a Shiny-App. Proper documentation will be added soon. For now, the app
-can be started directly from this repository via:
+This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). Features of the App are:
+
+* Upload of data (with seperate files for metabolite and factor data)
+* Matching via ID overlap
+* Preprocessing of data in each cohort including
+  + Removal of outliers defined as values +5 times the sample standard deviation (5*SD) on log-transformed data
+  + Inverse-normal-transformation of data to remove skew while regainig data structure (concerning zero-inflated values)
+  + Nonparametric batch-adjustment via an empirical Bayes method ([sva::ComBat](https://bioconductor.org/packages/release/bioc/html/sva.html))
+* Univariable association step of each metabolite with each factor in each cohort (Metabolite_i ~ Factor_j)
+* Correlation check and user guided descision on exclusion of too highly correlating factors
+* Multivariable association step of each metabolite with all factors in each cohort (Metabolite_i ~ Factor_1 + Factor_2 + ... Factor_J)
+* Selection of covariates for subsequent analyses of metabolites by removing factors not explaining a set amount of variance in at least one metabolite in at least one cohort via backwards selection until only factors meeting the explained variance criteria remain in the model 
+* Visualization of results
+* Sample and feature-centric annotation
+* Download of results
+
+A detailed description of the methods implemented and an application with data for 63 metabolites and 29 factors in three studies (N=16,222) can **soon** be found [here]()
+
+The app can be started directly from this repository via:
 
 ```r
 # to install shiny run:

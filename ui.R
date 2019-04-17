@@ -15,38 +15,38 @@ ui <- navbarPage("Analysis Steps",
                        helpText(strong("To ensure full functionality, please execute all steps in order."))
                      ),
                      mainPanel(width = 5,
-                       h3("Analysis Steps"),
-                       tags$hr(),
-                       h4("Step 1 - Upload of metabolite and covariate data"),
-                       p("Please upload the metabolite and
+                               h3("Analysis Steps"),
+                               tags$hr(),
+                               h4("Step 1 - Upload of metabolite and covariate data"),
+                               p("Please upload the metabolite and
                          covariate in the upload panel. The data is automatically uploaded and previewed.
                          Please make sure you upload the covariate data in the panel with the covariate label
                          and do the same for you metabolite data."),
-                       h4("Step 2 - Merging of data"),
-                       p("By selecting the sample ID columns for your data as well as the batch and cohort ID
+                               h4("Step 2 - Merging of data"),
+                               p("By selecting the sample ID columns for your data as well as the batch and cohort ID
                          from the provided drop-down menus you allow the correct assignment of these columns
                          for the merging of the data and the subsequent analysis. After selecting the right 
                          columns, press the 'Merge' button to preview and ready the data object for analysis."),
-                       h4("Step 3 - Pre-processing of data"),
-                       p("Choose whether you want to preprocess your metabolite data. Preprocessing steps include
-                         an outlier filter of 5xSD, an inverse-normal transformation and a batch-correction via
+                               h4("Step 3 - Pre-processing of data"),
+                               p("Choose whether you want to preprocess your metabolite data. Preprocessing steps include three steps.
+                         1) an outlier filter of 5xSD, 2) an inverse-normal transformation and 3) a batch-correction via
                          sva::ComBat()"),
-                       h4("Step 4 - Univariable Association"),
-                       p("Each metabolite will be associated with each covariate in in a univariate and univariable,
+                               h4("Step 4 - Univariable Association"),
+                               p("Each metabolite will be associated with each covariate in in a univariate and univariable,
                          linear model in each cohort. Test statistics are downloadable as .csv file "),
-                       h4("Step 5 - Check Correlation"),
-                       p("Highly correlated covariates may cause multicolinearity-issues in the multivariable association.
+                               h4("Step 5 - Check Correlation"),
+                               p("Highly correlated covariates may cause multicolinearity-issues in the multivariable association.
 You can check the pairwise Pearsons' correlation of each covariate pair in each cohort via a correlation
                          matrix plot for each cohort, accessible through the drop-down menu. By selecting a maximum allowable
                          correlation via the input slider, the app returns each covariate that correlate above the selected threshold
-                         by pressing the button. You may then select any of the highly correlating from the menu below and exclude 
-                         them from further analysis by pressing the 'Exclude'-button."),
-                       h4("Step 5 - Multivariable Association"),
-                       p("Multivariable model fit statistics using all (non-excluded) covariates as predictors for each metabolite.
+                         by pressing the button. You may then select and thus exclude any of the highly correlating factors from the menu below and exclude 
+                         them from further analysis. The selection can be reset by pressing the `Reset Factor Exclusion`-button"),
+                               h4("Step 5 - Multivariable Association"),
+                               p("Multivariable model fit statistics using all (non-excluded) covariates as predictors for each metabolite.
                          Results may be downloaded via the button."),
-                       h4("Step 6 - Multivariable Covariate Selection"),
-                       p("Search for covariates explaining a certain amount of variation in your data, e.g. for use as a consensus 
-covariate model for subsequent analysis. This method allows for conservative
+                               h4("Step 6 - Multivariable Covariate Selection"),
+                               p("Search for covariates explaining a certain amount of variation in your data, e.g. for use as a consensus 
+covariate model for subsequent analysis via backwards selection. This method removes factors not explaining a set amount of variance in at least one metabolite. This allows for conservative
                          analysis of data via the maximum partial explained variance per factor per cohort. The cutoff can be set manually
                          or the default may be chosen. Additionally, it is possible to include a set of factors as mandatory facors that
                          will be classified as relevent irrespective of their explained variance. This may be useful in case 
