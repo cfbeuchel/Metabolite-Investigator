@@ -1,6 +1,7 @@
 # which packages do I need for this app
 necessary.packages <- c(
   "data.table",
+  "corrplot",
   "sva",
   "shiny",
   "ggplot2",
@@ -30,6 +31,8 @@ for (i in necessary.packages) {
 options(shiny.maxRequestSize=30*1024^2) 
 
 # Functions ---------------------------------------------------------------
+source("functions/custom_corrplot.R")
+source("functions/make_matrices.R")
 source("functions/network_plot.R")
 source("functions/plot_correlation.R")
 source("functions/multivariable_assoc.R")

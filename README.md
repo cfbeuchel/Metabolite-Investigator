@@ -1,8 +1,10 @@
 # Metabolite-Investigator
 
-## Quick-Start
+## Description
 
 This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). Features of the App are:
+
+A detailed description of the methods used in the analysis as well as an application with data for 63 metabolites and 29 factors in three studies (N=16,222) can **soon** be found [here]()
 
 * Upload of data (with seperate files for metabolite and factor data)
 * Matching via ID overlap
@@ -18,7 +20,7 @@ This is a Shiny-App with the aim of facilitating association and covariate selec
 * Sample and feature-centric annotation
 * Download of results
 
-A detailed description of the methods implemented and an application with data for 63 metabolites and 29 factors in three studies (N=16,222) can **soon** be found [here]()
+## Quick-Start
 
 The app can be started directly from this repository via:
 
@@ -46,4 +48,26 @@ packages:
 * visNetwork (install via CRAN - `install.packages("visNetwork")`)
 * magrittr (install via CRAN - `install.packages("magrittr")`)
 * ggplot2 (install via CRAN - `install.packages("ggplot2")`)
+* corrplot (install via CRAN - `install.packages("corrplot")`)
 * scales (install via CRAN - `install.packages("scales")`)
+
+## References
+
+**This App could only be programmed by using these freely available tools:**
+
+* Jeffrey T. Leek, W. Evan Johnson, Hilary S. Parker, Elana J. Fertig, Andrew E. Jaffe, John D. Storey, Yuqing Zhang and Leonardo Collado Torres
+  (2019). sva: Surrogate Variable Analysis. R package version 3.30.1.
+* Matt Dowle and Arun Srinivasan (2019). data.table: Extension of `data.frame`. R package version 1.12.2.
+  https://CRAN.R-project.org/package=data.table
+* Almende B.V., Benoit Thieurmel and Titouan Robert (2019). visNetwork: Network Visualization using 'vis.js' Library. R package version 2.0.6.
+  https://CRAN.R-project.org/package=visNetwork
+* Stefan Milton Bache and Hadley Wickham (2014). magrittr: A Forward-Pipe Operator for R. R package version 1.5.
+  https://CRAN.R-project.org/package=magrittr
+* H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+* Taiyun Wei and Viliam Simko (2017). R package "corrplot": Visualization of a Correlation Matrix (Version 0.84). Available from
+  https://github.com/taiyun/corrplot
+* Hadley Wickham (2018). scales: Scale Functions for Visualization. R package version 1.0.0. https://CRAN.R-project.org/package=scales
+* R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL
+  https://www.R-project.org/.
+* Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2019). shiny: Web Application Framework for R. R package version 1.3.0.
+  https://CRAN.R-project.org/package=shiny

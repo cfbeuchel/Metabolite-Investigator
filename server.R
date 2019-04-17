@@ -359,6 +359,27 @@ server <- function(input, output, session) {
     # plot the unviaraiable results
     output$plot.univar <- renderPlot({plot_univar(data = res.univar, rSquaredCol = "r.squared")})
     
+    # reformat results for heatmap
+    uni.max.matrix <- make_matrices(st2 = res.univar,
+                                    r2Col = "r.squared",
+                                    pCol = "p.hierarchical.bonferroni")
+    
+    # build heatmap of results
+    output$heat.univar <- renderPlot({
+      custom_corrplot(uni.max.matrix$r2matrix,
+                      method="color",
+                      is.corr = F,
+                      p.mat = uni.max.matrix$pvalmatrix,
+                      insig = "label_sig", 
+                      sig.level=0.05, 
+                      pch.col = rgb(0,0,0,0.66), 
+                      col = colorRampPalette(c("blue", "grey95", "red"))(20),
+                      title = "Maximimum (signed) R2 across all cohorts",
+                      mar=c(0, 0, 4, 0),
+                      cl.length = 11
+      )
+    }) 
+    
     # save results for output
     output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
     values$res.univar <- res.univar
@@ -561,6 +582,27 @@ server <- function(input, output, session) {
     
     # plot the unviaraiable results
     output$plot.multivar <- renderPlot({plot_univar(data = res.multivar, rSquaredCol = "term.r.squared")})
+    
+    # reformat results for heatmap
+    multi.max.matrix <- make_matrices(st2 = res.multivar,
+                                    r2Col = "term.r.squared",
+                                    pCol = "p.hierarchical.bonferroni")
+    
+    # build heatmap of results
+    output$heat.multivar <- renderPlot({
+      custom_corrplot(multi.max.matrix$r2matrix,
+                      method="color",
+                      is.corr = F,
+                      p.mat = multi.max.matrix$pvalmatrix,
+                      insig = "label_sig", 
+                      sig.level=0.05, 
+                      pch.col = rgb(0,0,0,0.66), 
+                      col = colorRampPalette(c("blue", "grey95", "red"))(20),
+                      title = "Maximimum (signed) R2 across all cohorts",
+                      mar=c(0, 0, 4, 0),
+                      cl.length = 11
+      )
+    })
     
     # output methods text
     output$multivar.description <- renderText({

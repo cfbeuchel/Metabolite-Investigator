@@ -234,7 +234,8 @@ covariate model for subsequent analysis via backwards selection. This method rem
                                             h4("Methods Description"),
                                             tags$hr(),
                                             textOutput("univar.description")),
-                                   tabPanel("Plot", plotOutput("plot.univar", width = "70%")),
+                                   tabPanel("Boxplot", plotOutput("plot.univar", width = "70%")),
+                                   tabPanel("Heatmap", plotOutput("heat.univar", width = "70%")),
                                    tabPanel("Network", visNetworkOutput("network.univar")),
                                    tabPanel("Results", dataTableOutput("res.univar"))
                        )
@@ -311,7 +312,8 @@ covariate model for subsequent analysis via backwards selection. This method rem
                                             h4("Methods Description"),
                                             tags$hr(),
                                             textOutput("multivar.description")),
-                                   tabPanel("Plot", plotOutput("plot.multivar", width = "70%")),
+                                   tabPanel("Boxplot", plotOutput("plot.multivar", width = "70%")),
+                                   tabPanel("Heatmap", plotOutput("heat.multivar", width = "70%")),
                                    tabPanel("Network", visNetworkOutput("network.multivar")),
                                    tabPanel("Results", dataTableOutput("res.multivar"))
                        )
