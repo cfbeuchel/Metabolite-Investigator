@@ -1,5 +1,7 @@
 # which packages do I need for this app
 necessary.packages <- c(
+  "BiocManager",
+  "shinythemes",
   "data.table",
   "corrplot",
   "sva",
@@ -14,18 +16,37 @@ installed <- installed.packages()
 needed <- necessary.packages
 to.install <- needed[!(needed %in% installed[,1])]
 rm(installed)
-if(length(to.install)!=0){
-  if("sva" %in% to.install){
-    install.packages("BiocManager")
-    BiocManager::install("sva")
-  }
-  install.packages(to.install[to.install!="sva"], repos = "https://cran.uni-muenster.de/")
-}
+# if(length(to.install)!=0){
+#   if("sva" %in% to.install){
+#     install.packages("BiocManager")
+# 
+# 
+#     BiocManager::install("sva")
+#   }
+#   install.packages(to.install[to.install!="sva"], repos = "https://cran.uni-muenster.de/")
+# }
 
-# load required packages
-for (i in necessary.packages) {
-  suppressPackageStartupMessages(library(i, character.only = TRUE))
-}
+# Important dependency for hosting on shinyapps.io -----------------------
+options(repos = BiocManager::repositories())
+getOption("repos")
+
+# load required packages -> This doesn't work with parallel hosting on shinyapps.io -> breaks dependencies
+# for (i in necessary.packages) {
+#   suppressPackageStartupMessages(library(i, character.only = TRUE))
+# }
+
+# seperate calls to all packages? -> package dependency is otherwise not recognized by shinyapps.io
+library("BiocManager")
+library("shinythemes")
+library("data.table")
+library("corrplot")
+library("sva")
+library("shiny")
+library("ggplot2")
+library("magrittr")
+library("visNetwork")
+library("scales")
+library("sva")
 
 # shiny Options - enable larger Upload sizes
 options(shiny.maxRequestSize=30*1024^2) 

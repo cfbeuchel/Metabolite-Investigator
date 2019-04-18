@@ -22,7 +22,7 @@ A detailed description of the methods used in the analysis as well as an applica
 
 ## Quick-Start
 
-The app can be started directly from this repository via:
+The App is hosted on [Shinyapps.io](https://cfbeuchel.shinyapps.io/metabcovarselecter/). Otherwise, it can be started directly from this repository via:
 
 ```r
 # to install shiny run:
@@ -42,6 +42,9 @@ the functionality. Press the `Use Example Data` button to load the data and try 
 The app requires an up-to-date R installation as well as the following
 packages:
 
+* shiny  (install via CRAN - `install.packages("shiny")`)
+* shinythemes  (install via CRAN - `install.packages("shinythemes")`)
+* BiocManager  (install via CRAN - `install.packages("BiocManager")`)
 * sva (install via
   [Bioconductor](https://bioconductor.org/packages/release/bioc/html/sva.html))
 * data.table (install via CRAN - `install.packages("data.table")`)
@@ -55,6 +58,8 @@ packages:
 
 **This App could only be programmed by using these freely available tools:**
 
+* Martin Morgan (2018). BiocManager: Access the Bioconductor Project Package Repository. R package version 1.30.4.
+  https://CRAN.R-project.org/package=BiocManager
 * Jeffrey T. Leek, W. Evan Johnson, Hilary S. Parker, Elana J. Fertig, Andrew E. Jaffe, John D. Storey, Yuqing Zhang and Leonardo Collado Torres
   (2019). sva: Surrogate Variable Analysis. R package version 3.30.1.
 * Matt Dowle and Arun Srinivasan (2019). data.table: Extension of `data.frame`. R package version 1.12.2.
@@ -71,3 +76,4 @@ packages:
   https://www.R-project.org/.
 * Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2019). shiny: Web Application Framework for R. R package version 1.3.0.
   https://CRAN.R-project.org/package=shiny
+* Winston Chang (2018). shinythemes: Themes for Shiny. R package version 1.1.2. https://CRAN.R-project.org/package=shinythemes
