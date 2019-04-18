@@ -22,15 +22,12 @@ ui <-  navbarPage(
                 tags$hr(),
                 p("Analysis and integration of data from high-throughput targeted metabolomics data has become a common tool in epidemiological research. However, no standardised workflow for preprocessing and subsequent analysis for metabolomics data from multiple large studies has been established. This Shiny-App facilitates the pre-processing, association analysis and covariable selection for targeted metabolomics data from multiple study cohorts. We present a principled workflow tailored to the specific issues of metabolomics data, namely data skew, zero-inflation, (known) batch effects and the selection of a confounder model for the association with other '-omics' data sets. The descision for an analysis methodology was guided by a seperate simulation study to provide an approach with the least possible bias without compromising power."),
                 tags$hr(),
-                p("Upload and merging of metabolite and covariate data and can be executed in Steps 1 and 2. A short description of the workflow of these steps can be found below."),
+                p("Upload and merge metabolite and covariate data in steps 1.1 and 1.2. A short description of the workflow of these steps can be found below."),
                 tags$hr(),
-                h4("Step 1 - Upload of metabolite and covariate data"),
-                p("Please upload the metabolite and
-                         covariate in the upload panel. The data is automatically uploaded and previewed.
-                         Please make sure you upload the covariate data in the panel with the covariate label
-                         and do the same for you metabolite data."),
+                h4("Step 1.1 - Upload of metabolite and covariate data"),
+                p("Please upload the metabolite and covariate in the upload panel. The data is automatically uploaded and previewed. Please make sure you upload the covariate data in the panel with the covariate label and do the same for you metabolite data."),
                 # tags$hr(),
-                h4("Step 2 - Merging of data"),
+                h4("Step 1.2 - Merging of data"),
                 p("By selecting the sample ID columns for your data as well as the batch and cohort ID
                          from the provided drop-down menus you allow the correct assignment of these columns
                          for the merging of the data and the subsequent analysis. After selecting the right 
