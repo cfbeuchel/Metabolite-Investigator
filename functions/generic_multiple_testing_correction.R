@@ -24,7 +24,7 @@ generic_multiple_testing_correction <- function(
       , p.hierarchical.bonferroni :=
         addHierarchFDR(
           pvalues = p.value,
-          categs = as.character(term),
+          categs = as.character(metab),
           fdrmethod_level1 = "bonferroni",
           fdrmethod_level2 = "bonferroni",
           correctionLevel1 = "listlookup"
@@ -39,7 +39,7 @@ generic_multiple_testing_correction <- function(
       , p.benjamini.bogomolov := 
         addHierarchFDR(
           pvalues = p.value,
-          categs = as.character(term)
+          categs = as.character(metab)
         )$fdr_level1, by = .(cohort)]
     
   } else {
