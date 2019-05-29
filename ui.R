@@ -167,6 +167,19 @@ ui <-  navbarPage(
                    checkboxInput("button.choose.prepro",
                                  "Pre-Process metabolites?",
                                  value = T),
+                   helpText("Please select the pre-processing steps you would like to include:"),
+                   checkboxGroupInput(inputId = "button.prepro.steps",
+                                      label = "Included pre-processing steps",
+                                      choices = list(
+                                        "Outlier Filter of 5*SD",
+                                        "Inverse-Normal Transformation",
+                                        "Batch Adjustment"
+                                      ),
+                                      selected = list(
+                                        "Outlier Filter of 5*SD",
+                                        "Inverse-Normal Transformation",
+                                        "Batch Adjustment"
+                                      )),
                    tags$hr(),
                    helpText("Download Preprocessed Data:"),
                    downloadButton("download.dat", "Download", class = "butt")
@@ -181,7 +194,7 @@ ui <-  navbarPage(
                                      h4("Methods Description"),
                                      tags$hr(),
                                      p("Choose whether you want to preprocess your metabolite data. Preprocessing steps include three steps."),
-                                     p("1) An outlier filter of 5xSD on log-transformed data."),
+                                     p("1) An outlier filter of 5*SD on log-transformed data."),
                                      p("2) A rank-based inverse-normal transformation, matching the rank of each measurement to the quantiles of a standard normal distribution with a mean of 0 and a standard deviation of 1."),
                                      p("3) A batch-correction of known technical batches via a non-parametric empirical Bayes method implemented in sva::ComBat.  Missing values are mean imputed for the analysis and missingness will be restored afterwards. Batches with only a single value entry will be removed from further analysis. Batches with low variance cannot be removed by ComBat and will thus be removed via a linear model. Method of batch adjustment will be entered in the annotation file."),
                                      tags$hr(),

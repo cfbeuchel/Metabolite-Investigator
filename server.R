@@ -238,6 +238,7 @@ server <- function(input, output, session) {
     # single function pre-processing
     res <- pre_process_metabolites(
       preProcessMetabolites = pre.process.metabolites,
+      preProcessingSteps = input$button.prepro.steps, # new
       dataObject = dat,
       metaboliteAnnotation = annot.m,
       metaboliteColumns = m.cols,
