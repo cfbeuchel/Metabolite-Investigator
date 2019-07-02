@@ -372,7 +372,7 @@ server <- function(input, output, session) {
     # reformat results for heatmap
     uni.max.matrix <- make_matrices(st2 = res.univar,
                                     r2Col = "r.squared",
-                                    pCol = "p.hierarchical.bonferroni")
+                                    pCol = p.col)
     
     # build heatmap of results
     output$heat.univar <- renderPlot({
@@ -606,7 +606,7 @@ server <- function(input, output, session) {
     # reformat results for heatmap
     multi.max.matrix <- make_matrices(st2 = res.multivar,
                                     r2Col = "term.r.squared",
-                                    pCol = "p.hierarchical.bonferroni")
+                                    pCol = p.col)
     
     # build heatmap of results
     output$heat.multivar <- renderPlot({
