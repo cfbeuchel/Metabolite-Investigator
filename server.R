@@ -54,7 +54,7 @@ server <- function(input, output, session) {
         input.covar <- fread(input$input.covar$datapath,
                              sep = input$sep.covar,
                              quote = input$quote.covar)
-          input.covar
+        input.covar
       },
       error = function(e) {
         stop(safeError(e))
@@ -70,7 +70,7 @@ server <- function(input, output, session) {
         input.metab <- fread(input$input.metab$datapath,
                              sep = input$sep.metab,
                              quote = input$quote.metab)
-          input.metab
+        input.metab
       },
       error = function(e) {
         stop(safeError(e))
@@ -78,7 +78,7 @@ server <- function(input, output, session) {
     )
   }, options = list(pageLength = 10))
   
-
+  
   # Upload Metabolites ------------------------------------------------------
   observeEvent({
     input$input.metab
@@ -95,7 +95,7 @@ server <- function(input, output, session) {
     output$metab.upload.success <- renderText("Metabolite data uploaded successfully. Please make sure it is the right data.")
   })
   
-
+  
   # Upload Covariates -------------------------------------------------------
   observeEvent({
     input$input.covar
@@ -158,12 +158,12 @@ server <- function(input, output, session) {
     
     # valid selection of columns
     output$data.merge <- renderDataTable({
-    validate(
-      need(any(duplicated(c(values$metab.id,
-                           values$cohort.col,
-                            values$batch.col,
-                            values$m.cols))) != T, "Batch and Cohort ID cannot be identical. Please review your selection.")
-    )
+      validate(
+        need(any(duplicated(c(values$metab.id,
+                              values$cohort.col,
+                              values$batch.col,
+                              values$m.cols))) != T, "Batch and Cohort ID cannot be identical. Please review your selection.")
+      )
     }, options = list(pageLength = 10))
     
     # Merging -----------------------------------------------------------------
@@ -182,7 +182,7 @@ server <- function(input, output, session) {
     
     # helper text
     output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. If everything seems in order, move to the next step.")
-
+    
     # preview
     merged.preview <- values$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
     output$data.merge <- renderDataTable({merged.preview}, options = list(pageLength = 10))
@@ -233,7 +233,20 @@ server <- function(input, output, session) {
     }else {
       pre.process.metabolites <- F
     }
-    
+   
+    #=======================
+    # Add progress Indicator
+    withProgress(message = 'Crunching the numbers', value = 0, {
+      
+      # Number of times we'll go through the loop
+      n <- 10
+      
+      for (i in 1:n) {
+        
+        # Increment the progress bar, and update the detail text.
+        incProgress(1/n)
+      }
+     
     # preprocess data
     # single function pre-processing
     res <- pre_process_metabolites(
@@ -243,6 +256,9 @@ server <- function(input, output, session) {
       metaboliteAnnotation = annot.m,
       metaboliteColumns = m.cols,
       covariateColumns = c.cols)
+    
+    }) # end of progress indication
+    #=======================
     
     # re-assign output from prepro function
     annot.m <- res$annot.m
@@ -279,19 +295,19 @@ server <- function(input, output, session) {
     
     # Preview --------------------------
     # if(input$button.preview.prepro==T){
-      # show annotation table
-      output$prepro.annot.m <- renderDataTable({
-        annot.m
-      }, options = list(pageLength = 10))
-      # show annotation table
-      output$prepro.annot.c <- renderDataTable({
-        annot.c
-      }, options = list(pageLength = 10))
-      
-      # preview data
-      output$prepro.data <- renderDataTable({
-        dat
-      }, options = list(pageLength = 10))
+    # show annotation table
+    output$prepro.annot.m <- renderDataTable({
+      annot.m
+    }, options = list(pageLength = 10))
+    # show annotation table
+    output$prepro.annot.c <- renderDataTable({
+      annot.c
+    }, options = list(pageLength = 10))
+    
+    # preview data
+    output$prepro.data <- renderDataTable({
+      dat
+    }, options = list(pageLength = 10))
     # }
     
     # update selector for correlation
@@ -321,6 +337,9 @@ server <- function(input, output, session) {
     
     message("Starting")
     
+    
+    
+    
     # input
     dat <- isolate(values$dat)
     annot.c <- isolate(values$annot.c)
@@ -328,10 +347,25 @@ server <- function(input, output, session) {
     c.cols <- isolate(values$c.cols)
     multiple.testing <- isolate(input$univar.multiple.testing.correction.selecter)
     
-    # compute univariable association results
-    res.univar <- univariable_assoc(dometab = m.cols,
-                                    docovar = c.cols,
-                                    data = dat)
+    #=======================
+    # Add progress Indicator
+    withProgress(message = 'Crunching the numbers', value = 0, {
+      
+      # Number of times we'll go through the loop
+      n <- 10
+      
+      for (i in 1:n) {
+        
+        # Increment the progress bar, and update the detail text.
+        incProgress(1/n)
+      }
+      
+      # compute univariable association results
+      res.univar <- univariable_assoc(dometab = m.cols,
+                                      docovar = c.cols,
+                                      data = dat)
+    }) 
+    #=======================
     
     res.univar <- generic_multiple_testing_correction(
       data = res.univar,
@@ -339,7 +373,7 @@ server <- function(input, output, session) {
     
     # friedman/wilcoxon test for r2 difference
     r2.test <- test_r2_distribution(dat = res.univar,
-                         r2Col = "r.squared")
+                                    r2Col = "r.squared")
     
     # add friedman/wilcoxon results to factor annotation
     r2.test.matched <- match(annot.c$covariate, r2.test$term)
@@ -554,19 +588,35 @@ server <- function(input, output, session) {
     c.cols <- isolate(values$c.cols)
     multiple.testing <- isolate(input$multivar.multiple.testing.correction.selecter)
     
-    # compute multivariable association results
-    res.multivar <- multivariable_assoc(dometab = m.cols,
-                                        docovar = c.cols,
-                                        data = dat)
-    
-    res.multivar <- generic_multiple_testing_correction(
-      data = res.multivar,
-      correctionMethod = multiple.testing)
+    #=======================
+    # Add progress Indicator
+    withProgress(message = 'Crunching the numbers', value = 0, {
+      
+      # Number of times we'll go through the loop
+      n <- 10
+      
+      for (i in 1:n) {
+        
+        # Increment the progress bar, and update the detail text.
+        incProgress(1/n)
+      }
+      
+      # compute multivariable association results
+      res.multivar <- multivariable_assoc(dometab = m.cols,
+                                          docovar = c.cols,
+                                          data = dat)
+      
+      res.multivar <- generic_multiple_testing_correction(
+        data = res.multivar,
+        correctionMethod = multiple.testing)
+      
+    }) # end progression indication
+    #=======================
     
     # friedman/wilcoxon test for r2 difference
     r2.test <- test_r2_distribution(dat = res.multivar,
                                     r2Col = "term.r.squared")
-
+    
     # # add friedman/wilcoxon results to factor annotation
     r2.test.matched <- match(annot.c$covariate, r2.test$term)
     r2.test.join <- r2.test[(r2.test.matched), .SD, .SDcols = names(r2.test)[-1]]
@@ -605,8 +655,8 @@ server <- function(input, output, session) {
     
     # reformat results for heatmap
     multi.max.matrix <- make_matrices(st2 = res.multivar,
-                                    r2Col = "term.r.squared",
-                                    pCol = p.col)
+                                      r2Col = "term.r.squared",
+                                      pCol = p.col)
     
     # build heatmap of results
     output$heat.multivar <- renderPlot({
@@ -685,41 +735,57 @@ server <- function(input, output, session) {
     message(missingness.cutoff)
     message(mandatory.inclusion)
     
-    # start selection
-    results <- find_relevant_covariates(
-      covariateAnnotation = annot.c,
-      metaboliteAnnotation = annot.m,
-      dataObject = dat,
-      rSquaredCutoff = r.squared.cutoff,
-      includeHighMissings = include.high.missings,
-      missingnessCutoff = missingness.cutoff,
-      mandatoryInclusion = mandatory.inclusion,
-      metaboliteColumns = m.cols,
-      covariateColumns = c.cols
-    )
-    
-    # re-assign output
-    annot.c <- results$covariateAnnotation
-    annot.m <- results$metaboliteAnnotation
-    full.model.r.squared <- results$covariateModel
-    res.selected <- results$testStatistics
-    
-    # compute the remaining statistics for the not-selected covariates
-    res.remaining <- remaining_covariates(
-      relevantCovariates = full.model.r.squared,
-      CovariateColumns = c.cols,
-      MetaboliteColumns = m.cols,
-      dataObject = dat,
-      rSquaredCutoff = r.squared.cutoff,
-      highMissings = results$highMissings
-    )
-    
-    # Apply multiple testing correction
-    all.multi <- multiple_testing_correction(
-      dataObjectSelected = res.selected,
-      dataObjectRemaining = res.remaining,
-      correctionMethod = multiple.testing.correction
-    )
+    #=======================
+    # Add progress Indicator
+    withProgress(message = 'Crunching the numbers', value = 0, {
+      
+      # Number of times we'll go through the loop
+      n <- 10
+      
+      for (i in 1:n) {
+        
+        # Increment the progress bar, and update the detail text.
+        incProgress(1/n)
+      }
+      
+      # start selection
+      results <- find_relevant_covariates(
+        covariateAnnotation = annot.c,
+        metaboliteAnnotation = annot.m,
+        dataObject = dat,
+        rSquaredCutoff = r.squared.cutoff,
+        includeHighMissings = include.high.missings,
+        missingnessCutoff = missingness.cutoff,
+        mandatoryInclusion = mandatory.inclusion,
+        metaboliteColumns = m.cols,
+        covariateColumns = c.cols
+      )
+      
+      # re-assign output
+      annot.c <- results$covariateAnnotation
+      annot.m <- results$metaboliteAnnotation
+      full.model.r.squared <- results$covariateModel
+      res.selected <- results$testStatistics
+      
+      # compute the remaining statistics for the not-selected covariates
+      res.remaining <- remaining_covariates(
+        relevantCovariates = full.model.r.squared,
+        CovariateColumns = c.cols,
+        MetaboliteColumns = m.cols,
+        dataObject = dat,
+        rSquaredCutoff = r.squared.cutoff,
+        highMissings = results$highMissings
+      )
+      
+      # Apply multiple testing correction
+      all.multi <- multiple_testing_correction(
+        dataObjectSelected = res.selected,
+        dataObjectRemaining = res.remaining,
+        correctionMethod = multiple.testing.correction
+      )
+      
+    }) # end progression indication
+    #=======================
     
     #### PLOT ####
     plot <- plot_multivar(data = all.multi)
@@ -747,10 +813,10 @@ server <- function(input, output, session) {
                   isolate(values$r.squared.cutoff),
                   ". Please select a lower cutoff."),
         "Done! Please see the following tabs for your results"
-        )
       )
+    )
     
-
+    
     # Methods Description -----------------------------------------------------
     # placeholder
     univar.description <- NULL
