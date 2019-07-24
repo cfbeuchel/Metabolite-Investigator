@@ -409,7 +409,6 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
       mainPanel(width = 5,
                 h3("Covariate Selection"),
                 tags$hr(),
-                verbatimTextOutput("covar.select.start"),
                 verbatimTextOutput("covar.select.stop"),
                 tabsetPanel(id = "ChangeBasedOnThis", 
                             tabPanel(HTML("Description/<br/>Settings"), 

@@ -7,6 +7,24 @@ server <- function(input, output, session) {
   # for storage
   values <- reactiveValues()
   
+  # set success variables 0 for uncompleted steps. will be set to 1 when step has been completed
+  values$sucess.merge <- 0
+  values$sucess.prepro <- 0
+  values$sucess.uni <- 0
+  values$sucess.corr <- 0
+  values$sucess.multi <- 0
+  values$sucess.select <- 0
+  
+  # set empty download files to avoid error
+  values$dat <- list("Nothing to download, yet!")
+  values$annot.c <- list("Nothing to download, yet!")
+  values$annot.m <- list("Nothing to download, yet!")
+  values$res.univar <- list("Nothing to download, yet!")
+  values$res.multivar <- list("Nothing to download, yet!")
+  values$all.multi <- list("Nothing to download, yet!")
+  values$full.mode.r.squared <- list("Nothing to download, yet!")
+  
+  
   # show example data
   output$preview.example <- renderDataTable({
     data.table(id = paste0("Sample_", 1:12),
@@ -132,7 +150,25 @@ server <- function(input, output, session) {
   
   # Data Merging -----------------------------------
   # rename metab/covar columns
+  
   observeEvent(input$merge.button,{
+    
+    # check if data has been uploaded with user feedback
+    output$text.found.overlap <- renderText(
+      validate(
+        need(
+          expr = exists("input.covar") & exists("input.metab"),
+          message = "No input data provided! Please upload your data or select the example data.")
+      )
+    )
+    
+    # silent check for all inputs
+    req({
+      input$covar.id
+      input$metab.id
+      input$cohort.col
+      input$batch.col
+    })
     
     # assign values needed for merging
     values$covar.id <- input$covar.id
@@ -186,10 +222,27 @@ server <- function(input, output, session) {
     # preview
     merged.preview <- values$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
     output$data.merge <- renderDataTable({merged.preview}, options = list(pageLength = 10))
+    
+    # save an indicator that the previous step was sucessful
+    values$success.merge <- 1
+    
   })
   
   # Data preprocessing ------------------------------------------------------
   observeEvent(input$button.prepro, {
+    
+    # validate merged data
+    output$prepro.success <- renderText(
+      validate(
+        need(
+          expr = values$success.merge == 1,
+          message = "Please merge your data first!"
+        )
+      )
+    )
+    
+    # silent check
+    req(values$success.merge==1)
     
     dat <- isolate(values$dat)
     m.cols <- isolate(values$m.cols)
@@ -233,7 +286,7 @@ server <- function(input, output, session) {
     }else {
       pre.process.metabolites <- F
     }
-   
+    
     #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
@@ -246,17 +299,17 @@ server <- function(input, output, session) {
         # Increment the progress bar, and update the detail text.
         incProgress(1/n)
       }
-     
-    # preprocess data
-    # single function pre-processing
-    res <- pre_process_metabolites(
-      preProcessMetabolites = pre.process.metabolites,
-      preProcessingSteps = input$button.prepro.steps, # new
-      dataObject = dat,
-      metaboliteAnnotation = annot.m,
-      metaboliteColumns = m.cols,
-      covariateColumns = c.cols)
-    
+      
+      # preprocess data
+      # single function pre-processing
+      res <- pre_process_metabolites(
+        preProcessMetabolites = pre.process.metabolites,
+        preProcessingSteps = input$button.prepro.steps, # new
+        dataObject = dat,
+        metaboliteAnnotation = annot.m,
+        metaboliteColumns = m.cols,
+        covariateColumns = c.cols)
+      
     }) # end of progress indication
     #=======================
     
@@ -323,6 +376,9 @@ server <- function(input, output, session) {
     values$c.cols <- c.cols
     values$c.cols.original <- c.cols
     
+    # validation for next step
+    values$success.prepro <- 1
+    
     prepro.description <- NULL
     
     output$prepro.description <- renderText({
@@ -335,10 +391,16 @@ server <- function(input, output, session) {
   # Univariable Association -------------------------------------------------
   observeEvent(input$univar.assoc.button, {
     
-    message("Starting")
-    
-    
-    
+    # validate merged data
+    output$uni.success.text <- renderText(
+      validate(
+        need(
+          expr = values$success.prepro == 1,
+          message = "Please preprocess your data first!"
+        )
+      )
+    )
+    req(values$success.prepro==1)
     
     # input
     dat <- isolate(values$dat)
@@ -428,6 +490,7 @@ server <- function(input, output, session) {
     output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
     values$res.univar <- res.univar
     values$annot.c <- annot.c
+    values$success.uni <- 1
     
     # placeholder
     univar.description <- NULL
@@ -444,7 +507,6 @@ server <- function(input, output, session) {
       "Univariable associations calculated successfully. See the Plot-tab for a visualization and the Results-tab for the association statistics."
     })
     
-    message("Finishing")
   }) # End univariable association
   
   # download data
@@ -463,6 +525,17 @@ server <- function(input, output, session) {
   
   # Pressing button
   observeEvent(input$corr.check.button, {
+    
+    # validate merged data
+    output$high.corr <- renderText(
+      validate(
+        need(
+          expr = values$success.uni == 1,
+          message = "Please complete the univariable association step first!"
+        )
+      )
+    )
+    req(values$success.uni==1)
     
     # input
     annot.m <- isolate(values$annot.m)
@@ -515,6 +588,7 @@ server <- function(input, output, session) {
     values$dat <- dat
     values$m.cols <- m.cols
     values$c.cols <- c.cols
+    values$success.corr <- 1
   })
   
   
@@ -579,7 +653,17 @@ server <- function(input, output, session) {
   # Multivariable Association -----------------------------------------------
   observeEvent(input$multivar.assoc.button, {
     
-    message("Starting")
+    # validate merged data
+    output$multi.success.text <- renderText(
+      validate(
+        need(
+          expr = values$success.corr == 1,
+          message = "Please complete the correlation check first!"
+        )
+      )
+    )
+    req(values$success.corr==1)
+    
     
     # input
     annot.c <- isolate(values$annot.c)
@@ -688,13 +772,16 @@ server <- function(input, output, session) {
       "Multivariable associations calculated successfully. See the Results-tab for the association statistics."
     })
     
+    # log success of step
+    values$success.multi <- 1
+    
   }) # end multivariable association
   
   # download data
   output$download.multi <- downloadHandler(
     filename = "Multivariable_Association_Results.csv",
     content = function(file) {
-      fwrite(isolate(values$res.multivar), file)
+        fwrite(isolate(values$res.multivar), file)
     }
   )
   
@@ -711,7 +798,17 @@ server <- function(input, output, session) {
   # start calculations
   observeEvent(input$start.selection.button, {
     
-    output$covar.select.start <- renderText("Crunching the numbers... Please be patient...")
+    # validate merged data
+    output$covar.select.stop <- renderText(
+      validate(
+        need(
+          expr = values$success.multi == 1,
+          message = "Please complete the multivariable association step first!"
+        )
+      )
+    )
+    req(values$success.multi==1)
+    
     
     # input
     annot.m <- isolate(values$annot.m)
@@ -816,6 +913,8 @@ server <- function(input, output, session) {
       )
     )
     
+    #log success
+    values$sucess.select <- 1
     
     # Methods Description -----------------------------------------------------
     # placeholder
@@ -840,31 +939,31 @@ server <- function(input, output, session) {
   output$download.full.model.r.squared <- downloadHandler(
     filename = "Covariate_Selection.csv",
     content = function(file) {
-      fwrite(isolate(values$full.model.r.squared), file)
+        fwrite(isolate(values$full.model.r.squared), file)
     }
   )
   output$download.annot.c <- downloadHandler(
     filename = "Covariate_Annotation.csv",
     content = function(file) {
-      fwrite(isolate(values$annot.c), file)
+        fwrite(isolate(values$annot.c), file)
     }
   )
   output$download.annot.m <- downloadHandler(
     filename = "Metabolite_Annotation.csv",
     content = function(file) {
-      fwrite(isolate(values$annot.m), file)
+        fwrite(isolate(values$annot.m), file)
     }
   )
   output$download.dat <- downloadHandler(
     filename = "Preprocessed_Data.csv",
     content = function(file) {
-      fwrite(isolate(values$dat), file)
+        fwrite(isolate(values$dat), file)
     }
   )
   output$download.all.multi <- downloadHandler(
     filename = "Association_Results.csv",
     content = function(file) {
-      fwrite(isolate(values$all.multi), file)
+        fwrite(isolate(values$all.multi), file)
     }
   )
 }
