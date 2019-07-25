@@ -64,6 +64,17 @@ remaining_covariates <- function(
   add.r.squared[, r.squared.cutoff := r.squared.cutoff]
   }
   
+  # create empty dt when empty to avoid crash
+  if(nrow(add.r.squared)==0){
+    add.r.squared <- data.table(
+      cohort = NA,
+      response = NA,
+      term = NA,
+      estimate = NA,
+      p.value = NA
+    )
+  }
+  
   # return output
   return(add.r.squared)
 }

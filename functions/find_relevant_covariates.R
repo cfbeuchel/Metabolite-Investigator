@@ -82,8 +82,17 @@ find_relevant_covariates <- function(
     max.r.squared,
     by = .(cohort, term)]
   
-  # cast for easier comparison
-  selection.res <- dcast(final.res.paper, formula = term ~  cohort, value.var = "max.r.squared")
+  # create an empty result dt in case final.res.paper has nrow=0
+  if(nrow(final.res.paper)==0){
+    selection.res <- data.table(
+      term = NA
+    )
+    new.cols <- unique(dat$cohort)
+    selection.res[, (new.cols) := NA]
+  } else{
+    # cast for easier comparison
+    selection.res <- dcast(final.res.paper, formula = term ~  cohort, value.var = "max.r.squared")
+  }
   
   # source function to compute the partial r-squared
   final.pred <- selection.res$term
@@ -92,7 +101,7 @@ find_relevant_covariates <- function(
   my.log <- c()
   
   # ================================================================
-  # while there is no covar with r2 <= 0.025 in all cohorts, do this:
+  # while there is no covar with r2 <= cutoff in all cohorts, do this:
   if(!all(is.na(final.pred))){
     
   repeat{
@@ -200,7 +209,13 @@ find_relevant_covariates <- function(
   
   } else{ # end IF (empty final pred)
     full.model.r.squared <- data.table(covariate = NA)
-    partial.res <- NA
+    partial.res <- data.table(
+      cohort = NA,
+      response = NA,
+      term = NA,
+      estimate = NA,
+      p.value = NA
+    )
   } # end fail statement -> return empty results
   
   # return

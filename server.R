@@ -809,7 +809,6 @@ server <- function(input, output, session) {
     )
     req(values$success.multi==1)
     
-    
     # input
     annot.m <- isolate(values$annot.m)
     annot.c <- isolate(values$annot.c)
@@ -886,7 +885,17 @@ server <- function(input, output, session) {
     
     #### PLOT ####
     plot <- plot_multivar(data = all.multi)
-    output$multi.plot <- renderPlot(plot)
+    output$multi.plot <- renderPlot({
+      validate(
+        need(
+          !is.na(any(all.multi$term.r.squared)),
+          "Explained variances could not be calculated. Please reconsider your filters. Maybe you removed all covariates due to high missings?"
+        )
+      )
+      plot
+      })
+    
+    # output$multi.plot <- renderPlot(plot)
     
     # output
     values$all.multi <- all.multi
@@ -918,12 +927,12 @@ server <- function(input, output, session) {
     
     # Methods Description -----------------------------------------------------
     # placeholder
-    univar.description <- NULL
+    selection.description <- NULL
     
     # output methods text
     output$selection.description <- renderText({
       validate(
-        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+        need(!is.null(selection.description), message = "This is not yet available. See future Updates for a detailed description.")
       )
     })
     

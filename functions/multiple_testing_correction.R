@@ -18,7 +18,17 @@ multiple_testing_correction <- function(
     to.merge,
     use.names = T)
   
-  if(multiple.testing.correction == "fdr"){
+  # return empty data in case there are missings in the pval column
+  if(any(is.na(all.multi$p.value))){
+    
+    p.col <- "error"
+    all.multi[,error:="Missings in p-value column. Please reconsider your filters!"]
+    all.multi[,term.r.squared:=NA]
+    message("Missings found in the p-value column. No multiple testing correction possible. Reconsider the set filters and re-run the analysis.")
+    setnames(all.multi, old = c("term", "response"), new = c("covariate", "metabolite"))
+    return(all.multi)
+    
+  } else if(multiple.testing.correction == "fdr"){
     
     p.col <- "p.fdr"
     all.multi[, p.fdr := p.adjust(p.value, method = "BH"), by =  .(cohort)]
