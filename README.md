@@ -4,7 +4,7 @@
 
 This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). Features of the App are:
 
-A detailed description of the methods used in the analysis as well as an application with data for 63 metabolites and 29 factors in three studies (N=16,222) is integrated in the LHA ([Leipzig Health Atlas](https://www.health-atlas.de/)) [here](https://www.health-atlas.de/lha/7wdqd8nhcv-5).
+A detailed description of the methods used in the analysis as well as an application with data for 63 metabolites and 29 factors in three studies (N=16,222) is integrated in the LHA ([Leipzig Health Atlas](https://www.health-atlas.de/)) [here](https://www.health-atlas.de/models/23).
 
 * Upload of data (with seperate files for metabolite and factor data)
 * Matching via ID overlap
@@ -22,7 +22,7 @@ A detailed description of the methods used in the analysis as well as an applica
 
 ## Quick-Start
 
-The App is hosted on [Shinyapps.io](https://cfbeuchel.shinyapps.io/metabcovarselecter/). Otherwise, it can be started directly from this repository via:
+The App is hosted on the LHA-Servers [here](https://apps.health-atlas.de/metabolite-investigator/). Otherwise, it can be started directly from this repository via:
 
 ```r
 # to install shiny run:
