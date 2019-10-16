@@ -790,7 +790,7 @@ server <- function(input, output, session) {
   observe({
     values$r.squared.cutoff <- input$r.squared.cutoff.slider
     values$multiple.testing.correction <- input$multiple.testing.correction.selecter
-    values$include.high.missings <- input$include.high.missings.checkbox
+    values$exclude.high.missings <- input$exclude.high.missings.checkbox
     values$missingness.cutoff <- input$missingness.cutoff.slider
     values$mandatory.inclusion <- input$mandatory.inclusion.selecter
   })
@@ -819,7 +819,7 @@ server <- function(input, output, session) {
     # isolate parameters
     r.squared.cutoff <- isolate(values$r.squared.cutoff)
     multiple.testing.correction <- isolate(values$multiple.testing.correction)
-    include.high.missings <- isolate(values$include.high.missings)
+    exclude.high.missings <- isolate(values$exclude.high.missings)
     missingness.cutoff <- isolate(values$missingness.cutoff)
     mandatory.inclusion <- isolate(values$mandatory.inclusion)
     
@@ -827,7 +827,7 @@ server <- function(input, output, session) {
     
     message(r.squared.cutoff)
     message(multiple.testing.correction)
-    message(include.high.missings)
+    message(exclude.high.missings)
     message(missingness.cutoff)
     message(mandatory.inclusion)
     
@@ -850,7 +850,7 @@ server <- function(input, output, session) {
         metaboliteAnnotation = annot.m,
         dataObject = dat,
         rSquaredCutoff = r.squared.cutoff,
-        includeHighMissings = include.high.missings,
+        includeHighMissings = !exclude.high.missings,
         missingnessCutoff = missingness.cutoff,
         mandatoryInclusion = mandatory.inclusion,
         metaboliteColumns = m.cols,
