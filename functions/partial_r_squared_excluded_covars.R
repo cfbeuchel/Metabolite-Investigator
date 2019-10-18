@@ -41,8 +41,8 @@ partial_r_squared_excluded_covars <- function(cohort,
       
       # extract the explained variance 
       my.full.adj.r.squared <- my.full.model$adj.r.squared
-      my.full.r.squared <- my.full.model$r.squared
-      my.reduced.r.squared <- my.reduced.model$r.squared
+      my.full.r.squared <- my.full.model$adj.r.squared
+      my.reduced.r.squared <- my.reduced.model$adj.r.squared
       
       # substract r-squares to get explained variance of my.covar
       my.r.squared <- my.full.r.squared - my.reduced.r.squared

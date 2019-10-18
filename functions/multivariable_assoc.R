@@ -35,9 +35,9 @@ multivariable_assoc <- function(dometab, docovar, data, r_on_server = F) {
         my.reduced.model <- summary(lm(formula = my.reduced.formula, data = data[cohort == my.cohort, ]))
         
         # extract the explained variance 
-        my.full.r.squared <- my.full.model$r.squared
+        my.full.r.squared <- my.full.model$adj.r.squared
         my.full.r.squared.adj <- my.full.model$adj.r.squared
-        my.reduced.r.squared <- my.reduced.model$r.squared
+        my.reduced.r.squared <- my.reduced.model$adj.r.squared
         
         # clean output
         res <- as.data.frame(coefficients(my.full.model))
