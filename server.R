@@ -388,7 +388,7 @@ server <- function(input, output, session) {
     })
   }) # end of prepro
   
-  # Univariable Association -------------------------------------------------
+    # Univariable Association -------------------------------------------------
   observeEvent(input$univar.assoc.button, {
     
     # validate merged data

@@ -247,6 +247,7 @@ ui <-  navbarPage(
                             tabPanel("Boxplot", plotOutput("plot.univar", width = "70%")),
                             tabPanel("Heatmap", plotOutput("heat.univar", width = "70%")),
                             tabPanel("Network", visNetworkOutput("network.univar")),
+                            tabPanel("Interaction"), #TODO#
                             tabPanel("Results", dataTableOutput("res.univar"))
                 )
       )

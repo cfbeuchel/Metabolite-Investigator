@@ -480,8 +480,8 @@ custom_corrplot <- function (corr, method = c("circle", "square", "ellipse", "nu
       ylim <- c(n1 - 0.5 - nn * cl.ratio, n1 - 0.5 - nn * 
                   0.02)
     }
-    corrplot:::colorlegend(colbar = colbar, labels = round(labels, #TAG#
-                                                2), offset = cl.offset, ratio.colbar = 0.3, cex = cl.cex, 
+    colorlegend(colbar = colbar, labels = round(labels, #TAG# Carl Edit
+                                                2), offset = cl.offset, ratio.colbar = 0.3, cex = cl.cex,
                 xlim = xlim, ylim = ylim, vertical = vertical, align = cl.align.text)
   }
   if (tl.pos != "n") {
