@@ -10,37 +10,52 @@ generic_multiple_testing_correction <- function(
     
     p.col <- "p.fdr"
     data[, p.fdr := p.adjust(p.value, method = "BH"), by =  .(cohort)]
+    data$tmp.sig <- data$p.fdr<=0.05
+    data$tmp.p.adj <- data$p.fdr
+    
     
   }else if(multiple.testing.correction == "bonferroni"){
     
     p.col <- "p.bonferroni"
     data[, p.bonferroni := p.adjust(p.value, method = "bonferroni"), by =  .(cohort)]
+    data$tmp.sig <- data$p.fdr<=0.05
+    data$tmp.p.adj <- data$p.bonferroni
     
   } else if(multiple.testing.correction == "hierarchical.bf"){
     
     # Bonferroni
     p.col <- "p.hierarchical.bonferroni"
-    data[
-      , p.hierarchical.bonferroni :=
-        addHierarchFDR(
-          pvalues = p.value,
-          categs = as.character(term),
-          fdrmethod_level1 = "bonferroni",
-          fdrmethod_level2 = "bonferroni",
-          correctionLevel1 = "listlookup"
-        )$fdr_level1,
+    hier <- data[, addHierarchFDR(
+        pvalues = p.value,
+        categs = as.character(term),
+        fdrmethod_level1 = "bonferroni",
+        fdrmethod_level2 = "bonferroni",
+        correctionLevel1 = "listlookup"
+      ),
       by = .(cohort)]
     
-  } else if(multiple.testing.correction == "hierarchical.bb"){
+    data$p.hierarchical.bonferroni.level1 <- hier$fdr_level1
+    data$p.hierarchical.bonferroni.level2 <- hier$fdr_level2
+    data$p.hierarchical.bonferroni.sig <- hier$hierarch_fdr5proz
+    data$tmp.sig <- data$p.hierarchical.bonferroni.sig
+    data$tmp.p.adj <- data$p.hierarchical.bonferroni.level1
+    
+    } else if(multiple.testing.correction == "hierarchical.bb"){
     
     # Benjamini Bogomolov -> standard BH-BH and BB second level adjustment
     p.col <- "p.benjamini.bogomolov"
-    data[
+    hier <- data[
       , p.benjamini.bogomolov := 
         addHierarchFDR(
           pvalues = p.value,
           categs = as.character(term)
-        )$fdr_level1, by = .(cohort)]
+        ), by = .(cohort)]
+    
+    data$p.benjamini.bogomolov.level1 <- hier$fdr_level1
+    data$p.benjamini.bogomolov.level2 <- hier$fdr_level2
+    data$p.benjamini.bogomolov.sig <- hier$hierarch_fdr5proz
+    data$tmp.sig <- data$p.benjamini.bogomolov.sig
+    data$tmp.p.adj <- data$p.benjamini.bogomolov.level1
     
   } else {
     stop("Non-avaliable multiple-testing correction method supplied. Please choose one of the four available methods.")

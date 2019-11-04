@@ -229,7 +229,10 @@ ui <-  navbarPage(
                                  value = T),
                    tags$hr(),
                    helpText("Download Univariable Association Results:"),
-                   downloadButton("download.uni", "Download", class = "butt")
+                   downloadButton("download.uni", "Download", class = "butt"),
+                   tags$hr(),
+                   helpText("Download Univariable Factor-Cohort Interaction Results:"),
+                   downloadButton("download.int.uni", "Download", class = "butt")
       ),
       mainPanel(width = 5,
                 h3("Univariable Covariate Association"),
@@ -243,12 +246,15 @@ ui <-  navbarPage(
                                      p("In this step, each metabolite will be associated with each covariate in in a univariate and univariable
                          linear model seperately in each cohort. Multiple testing correction for each cohort will be applied according to the selection in the drop down menu. Test statistics are downloadable as .csv file. Provided visualizations are a boxplot of the distributions of the explained variances for each factor in each cohort, a heatmap of the highest explained variance (signed by the direction of the effect estimate) of each factor for each metabolite over all cohorts and a (non-)hierarchical network with metabolites and factors as nodes and the maximum explained variance as edges. Further, the difference in the distribution of explained variance between cohorts will be quantified by Friedman test and when two distributions are compared via the Wilcoxon signed rank test. Benjamini-Hochberg correction for multiple testing will be applied afterwards."),
                                      tags$hr(),
+                                     h5("Cohort Interaction Test"),
+                                     p("Presense of univariable interaction terms of the cohort with each factor is analysed for each metabolite. "),
                                      textOutput("univar.description")),
                             tabPanel("Boxplot", plotOutput("plot.univar", width = "70%")),
                             tabPanel("Heatmap", plotOutput("heat.univar", width = "70%")),
                             tabPanel("Network", visNetworkOutput("network.univar")),
-                            tabPanel("Interaction"), #TODO#
-                            tabPanel("Results", dataTableOutput("res.univar"))
+                            tabPanel("Results", dataTableOutput("res.univar")),
+                            tabPanel("Interaction Heatmap", plotOutput("heat.int.univar", width = "70%")),
+                            tabPanel("Interaction Results", dataTableOutput("res.int.univar"))
                 )
       )
     )
@@ -322,7 +328,9 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                                  value = T),
                    tags$hr(),
                    helpText("Download Multivariable Association Results:"),
-                   downloadButton("download.multi", "Download", class = "butt")
+                   downloadButton("download.multi", "Download", class = "butt"),
+                   helpText("Download Multivariable Factor-Cohort Interaction Association Results:"),
+                   downloadButton("download.int.multi", "Download", class = "butt")
       ),
       mainPanel(width = 5,
                 h3("Multivariable Covariate Association"),
@@ -339,7 +347,9 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                             tabPanel("Boxplot", plotOutput("plot.multivar", width = "70%")),
                             tabPanel("Heatmap", plotOutput("heat.multivar", width = "70%")),
                             tabPanel("Network", visNetworkOutput("network.multivar")),
-                            tabPanel("Results", dataTableOutput("res.multivar"))
+                            tabPanel("Results", dataTableOutput("res.multivar")),
+                            tabPanel("Interaction Heatmap", plotOutput("heat.int.multivar", width = "70%")),
+                            tabPanel("Interaction Results", dataTableOutput("res.int.multivar"))
                 )
       )
     )
