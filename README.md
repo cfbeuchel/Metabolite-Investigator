@@ -13,8 +13,10 @@ A detailed description of the methods used in the analysis as well as an applica
   + Inverse-normal-transformation of data to remove skew while regainig data structure (concerning zero-inflated values)
   + Nonparametric batch-adjustment via an empirical Bayes method ([sva::ComBat](https://bioconductor.org/packages/release/bioc/html/sva.html))
 * Univariable association step of each metabolite with each factor in each cohort (Metabolite_i ~ Factor_j)
+* Univariable test for interaction of each factor with the cohort term (Metabolite_i ~ Factor_j + cohort + Factor_j*cohort)
 * Correlation check and user guided descision on exclusion of too highly correlating factors
 * Multivariable association step of each metabolite with all factors in each cohort (Metabolite_i ~ Factor_1 + Factor_2 + ... Factor_J)
+* Multivariable test for interaction of each factor with the cohort term (Metabolite_i ~ Factor_1 + Factor_2 + ... Factor_J + Factor_1\*cohort + ... + Factor_J\*cohort + cohort)
 * Selection of covariates for subsequent analyses of metabolites by removing factors not explaining a set amount of variance in at least one metabolite in at least one cohort via backwards selection until only factors meeting the explained variance criteria remain in the model 
 * Visualization of results
 * Sample and feature-centric annotation

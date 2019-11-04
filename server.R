@@ -383,12 +383,12 @@ server <- function(input, output, session) {
     
     prepro.description <- NULL
     
-    output$prepro.description <- renderText({
-      validate(
-        need(!is.null(prepro.description), 
-             message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$prepro.description <- renderText({
+    #   validate(
+    #     need(!is.null(prepro.description), 
+    #          message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
   }) # end of prepro
   
   # Univariable Association -------------------------------------------------
@@ -573,11 +573,11 @@ server <- function(input, output, session) {
     univar.description <- NULL
     
     # output methods text
-    output$univar.description <- renderText({
-      validate(
-        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$univar.description <- renderText({
+    #   validate(
+    #     need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     # return success message
     output$uni.success.text <- renderText({
@@ -916,12 +916,12 @@ server <- function(input, output, session) {
     values$annot.c <- annot.c
     
     # output methods text
-    output$multivar.description <- renderText({
-      validate(
-        need(!is.null(multivar.description),
-             message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$multivar.description <- renderText({
+    #   validate(
+    #     need(!is.null(multivar.description),
+    #          message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     message("Finishing")
     
@@ -1094,11 +1094,11 @@ server <- function(input, output, session) {
     selection.description <- NULL
     
     # output methods text
-    output$selection.description <- renderText({
-      validate(
-        need(!is.null(selection.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$selection.description <- renderText({
+    #   validate(
+    #     need(!is.null(selection.description), message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     # Output
     output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
