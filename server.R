@@ -20,7 +20,9 @@ server <- function(input, output, session) {
   values$annot.c <- list("Nothing to download, yet!")
   values$annot.m <- list("Nothing to download, yet!")
   values$res.univar <- list("Nothing to download, yet!")
+  values$res.int.univar <- list("Nothing to download, yet!")
   values$res.multivar <- list("Nothing to download, yet!")
+  values$res.int.multivar <- list("Nothing to download, yet!")
   values$all.multi <- list("Nothing to download, yet!")
   values$full.mode.r.squared <- list("Nothing to download, yet!")
   
@@ -381,11 +383,12 @@ server <- function(input, output, session) {
     
     prepro.description <- NULL
     
-    output$prepro.description <- renderText({
-      validate(
-        need(!is.null(prepro.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$prepro.description <- renderText({
+    #   validate(
+    #     need(!is.null(prepro.description), 
+    #          message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
   }) # end of prepro
   
   # Univariable Association -------------------------------------------------
@@ -409,7 +412,6 @@ server <- function(input, output, session) {
     c.cols <- isolate(values$c.cols)
     multiple.testing <- isolate(input$univar.multiple.testing.correction.selecter)
     
-    #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
       
@@ -426,8 +428,26 @@ server <- function(input, output, session) {
       res.univar <- univariable_assoc(dometab = m.cols,
                                       docovar = c.cols,
                                       data = dat)
+      
+      # Interaction ----
+      # only when one or more cohorts are present!
+      if(length(unique(dat$cohort))>1){
+        
+        interaction.univar <- interaction_partial_r_squared_uni(
+          responses = m.cols,
+          predictors = c.cols,
+          dat = dat,
+          verbose = TRUE
+        )
+        
+        # set variable for successful completion of step
+        interaction.test <- TRUE
+        
+      } else{
+        interaction.univar <- "Only one cohort. No Interactions to test!"
+        interaction.test <- FALSE
+      }
     }) 
-    #=======================
     
     res.univar <- generic_multiple_testing_correction(
       data = res.univar,
@@ -443,9 +463,9 @@ server <- function(input, output, session) {
     annot.c[, paste0("univar.", names(r2.test.join)) := r2.test.join]
     
     # annotate significance
-    p.col <- tail(names(res.univar), 1)
-    sig.factors <- res.univar[, .(sig = base::min(.SD) < 0.05,
-                                  min.p = base::min(.SD)) ,by = .(term, cohort), .SDcols = p.col]
+    p.col <- "tmp.p.adj"
+    sig.factors <- res.univar[, .(sig = any(tmp.sig == TRUE),
+                                  min.p = base::min(tmp.p.adj)) ,by = .(term, cohort)]
     annot.c[, tmp:=paste0(cohort, "_", covariate)]
     sig.factors[, tmp:=paste0(cohort, "_", term)]
     annot.c[match(sig.factors$tmp, tmp), univariable.min.p := sig.factors$min.p]
@@ -460,15 +480,20 @@ server <- function(input, output, session) {
                    rSquaredColumn = "r.squared",
                    pColumn = p.col,
                    cohort = input$network.uni.select,
-                   hierarchicalNetwork = input$network.uni.hierarch)})
+                   hierarchicalNetwork = input$network.uni.hierarch)
+      })
     
     # plot the unviaraiable results
-    output$plot.univar <- renderPlot({plot_univar(data = res.univar, rSquaredCol = "r.squared")})
+    output$plot.univar <- renderPlot({
+      plot_univar(data = copy(res.univar), 
+                  rSquaredCol = "r.squared")
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # reformat results for heatmap
-    uni.max.matrix <- make_matrices(st2 = res.univar,
+    uni.max.matrix <- make_matrices(dat = res.univar,
                                     r2Col = "r.squared",
-                                    pCol = p.col)
+                                    pCol = "tmp.p.adj",
+                                    significant = "tmp.sig")
     
     # build heatmap of results
     output$heat.univar <- renderPlot({
@@ -484,23 +509,91 @@ server <- function(input, output, session) {
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )
-    }) 
+    },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
+    
+    # interaction Plot ----
+    if(interaction.test==TRUE){
+      
+      # needed for by in the multiple testing cohort
+      interaction.univar$cohort <- "dummy"
+      
+      # lr test p als pvalue in die function
+      interaction.univar$p.value <- interaction.univar$lr.test.p
+      
+      interaction.univar <- generic_multiple_testing_correction(
+        data = interaction.univar,
+        correctionMethod = multiple.testing)
+      
+      # plotting formatting
+      uni.int.form <- format_for_custom_corrplot(
+        metabCol = "metab",
+        covarCol = "term",
+        r2Col = "interaction.r.squared",
+        pCol = "tmp.p.adj", 
+        sigCol = "tmp.sig",
+        dat = interaction.univar,
+        clustMethod = "ward.D2")
+      
+      rowOrderMaxR2 = rownames(uni.int.form$r2matrix)
+      colOrderMaxR2 = colnames(uni.int.form$r2matrix)
+      
+      output$heat.int.univar <- renderPlot({
+        
+        # plot 
+        custom_corrplot(uni.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
+                        p.mat = uni.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
+                        hclust.method = "ward.D2",
+                        method="color",
+                        is.corr = F, 
+                        insig = "label_sig", 
+                        sig.level=0.05,
+                        pch.col = rgb(0,0,0,0.66),
+                        # pch.cex = 1.0,
+                        # tl.cex = 0.6,
+                        col = colorRampPalette(c("red", "white", "#006027"))(20),
+                        title = "Univariable Interaction factor*cohort signed R2",
+                        mar=c(0, 0, 2, 0),
+                        cl.length = 11)
+      },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), 
+      height = 75 * length(c.cols))
+      
+      # remove tmp cols
+      res.uni.int.out <- copy(interaction.univar)
+      res.uni.int.out$p.value <- NULL
+      res.uni.int.out$tmp.sig <- NULL
+      res.uni.int.out$tmp.p.adj <- NULL
+      res.uni.int.out$cohort <- NULL
+      
+    }else{
+      res.uni.int.out <- copy(interaction.univar)
+    } #  end interaction IF statement
+    
+    # create a copy for output
+    res.uni.out <- copy(res.univar)
+    res.uni.out$tmp.sig <- NULL
+    res.uni.out$tmp.p.adj <- NULL
+    
+    # End: interaction Plot ----
     
     # save results for output
-    output$res.univar <- renderDataTable(res.univar, options = list(pageLength = 10))
-    values$res.univar <- res.univar
+    output$res.univar <- renderDataTable(res.uni.out, options = list(pageLength = 10))
+    values$res.univar <- res.uni.out
     values$annot.c <- annot.c
     values$success.uni <- 1
+    
+    # save interaction results for output
+    output$res.int.univar <- renderDataTable(res.uni.int.out, options = list(pageLength = 10))
+    values$res.int.univar <- res.uni.int.out
     
     # placeholder
     univar.description <- NULL
     
     # output methods text
-    output$univar.description <- renderText({
-      validate(
-        need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$univar.description <- renderText({
+    #   validate(
+    #     need(!is.null(univar.description), message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     # return success message
     output$uni.success.text <- renderText({
@@ -514,6 +607,14 @@ server <- function(input, output, session) {
     filename = "Univariable_Association_Results.csv",
     content = function(file) {
       fwrite(isolate(values$res.univar), file)
+    }
+  )
+  
+  # download data
+  output$download.int.uni <- downloadHandler(
+    filename = "Univariable_Interaction_Results.csv",
+    content = function(file) {
+      fwrite(isolate(values$res.int.univar), file)
     }
   )
   
@@ -664,7 +765,6 @@ server <- function(input, output, session) {
     )
     req(values$success.corr==1)
     
-    
     # input
     annot.c <- isolate(values$annot.c)
     dat <- isolate(values$dat)
@@ -672,7 +772,6 @@ server <- function(input, output, session) {
     c.cols <- isolate(values$c.cols)
     multiple.testing <- isolate(input$multivar.multiple.testing.correction.selecter)
     
-    #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
       
@@ -694,8 +793,26 @@ server <- function(input, output, session) {
         data = res.multivar,
         correctionMethod = multiple.testing)
       
+      # Interaction ----
+      # only when one or more cohorts are present!
+      if(length(unique(dat$cohort))>1){
+        
+        interaction.multivar <- interaction_partial_r_squared_multi(
+          responses = m.cols,
+          predictors = c.cols,
+          dat = dat,
+          verbose = TRUE
+        )
+        
+        # set variable for successful completion of step
+        interaction.test <- TRUE
+        
+      } else{
+        interaction.multivar <- "Only one cohort. No Interactions to test!"
+        interaction.test <- FALSE
+      }
+      
     }) # end progression indication
-    #=======================
     
     # friedman/wilcoxon test for r2 difference
     r2.test <- test_r2_distribution(dat = res.multivar,
@@ -707,9 +824,10 @@ server <- function(input, output, session) {
     annot.c[, paste0("multivar.", names(r2.test.join)) := r2.test.join]
     
     # some formatting
-    p.col <- tail(names(res.multivar), 1)
-    sig.factors <- res.multivar[, .(sig = base::min(.SD) < 0.05,
-                                    min.p = base::min(.SD)) ,by = .(term, cohort), .SDcols = p.col]
+    p.col <- "tmp.p.adj"
+    sig.factors <- res.multivar[, .(sig = any(tmp.sig == TRUE),
+                                    min.p = base::min(tmp.p.adj)),
+                                by = .(term, cohort)]
     annot.c[, tmp:=paste0(cohort, "_", covariate)]
     sig.factors[, tmp:=paste0(cohort, "_", term)]
     annot.c[match(sig.factors$tmp, tmp), multivariable.min.p := sig.factors$min.p]
@@ -726,21 +844,19 @@ server <- function(input, output, session) {
                    cohort = input$network.multi.select,
                    hierarchicalNetwork = input$network.multi.hierarch)})
     
-    # save results for output
-    output$res.multivar <- renderDataTable(res.multivar, options = list(pageLength = 10))
-    values$res.multivar <- res.multivar
-    values$annot.c <- annot.c
-    
     # placeholder
     multivar.description <- NULL
     
-    # plot the unviaraiable results
-    output$plot.multivar <- renderPlot({plot_univar(data = res.multivar, rSquaredCol = "term.r.squared")})
+    # plot the multivariable results
+    output$plot.multivar <- renderPlot({
+      plot_univar(data = copy(res.multivar), rSquaredCol = "term.r.squared")
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # reformat results for heatmap
-    multi.max.matrix <- make_matrices(st2 = res.multivar,
+    multi.max.matrix <- make_matrices(dat = res.multivar,
                                       r2Col = "term.r.squared",
-                                      pCol = p.col)
+                                      pCol = p.col, 
+                                      significant = "tmp.sig")
     
     # build heatmap of results
     output$heat.multivar <- renderPlot({
@@ -756,14 +872,85 @@ server <- function(input, output, session) {
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )
-    })
+    },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
+    
+    # Multi interaction Plot ----
+    if(interaction.test==TRUE){
+      
+      # needed for by in the multiple testing cohort
+      interaction.multivar$cohort <- "dummy"
+      
+      # lr test p als pvalue in die function
+      interaction.multivar$p.value <- interaction.multivar$lr.test.p
+      
+      interaction.multivar <- generic_multiple_testing_correction(
+        data = interaction.multivar,
+        correctionMethod = multiple.testing)
+      
+      # plotting formatting
+      multi.int.form <- format_for_custom_corrplot(
+        metabCol = "metab",
+        covarCol = "term",
+        r2Col = "interaction.r.squared",
+        pCol = "tmp.p.adj", 
+        sigCol = "tmp.sig",
+        dat = interaction.multivar,
+        clustMethod = "ward.D2")
+      
+      rowOrderMaxR2 = rownames(multi.int.form$r2matrix)
+      colOrderMaxR2 = colnames(multi.int.form$r2matrix)
+      
+      output$heat.int.multivar <- renderPlot({
+        
+        # plot 
+        custom_corrplot(multi.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
+                        p.mat = multi.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
+                        hclust.method = "ward.D2",
+                        method="color",
+                        is.corr = F, 
+                        insig = "label_sig", 
+                        sig.level=0.05,
+                        pch.col = rgb(0,0,0,0.66),
+                        # pch.cex = 1.0,
+                        # tl.cex = 0.6,
+                        col = colorRampPalette(c("red", "white", "#006027"))(20),
+                        title = "Multivariable Interaction factor*cohort signed R2",
+                        mar=c(0, 0, 2, 0),
+                        cl.length = 11)
+        
+      },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
+      
+      # remove tmp cols
+      res.multi.int.out <- copy(interaction.multivar)
+      res.multi.int.out$p.value <- NULL
+      res.multi.int.out$tmp.sig <- NULL
+      res.multi.int.out$tmp.p.adj <- NULL
+      res.multi.int.out$cohort <- NULL
+      
+    }else{
+    res.multi.int.out <- copy(interaction.multivar)
+    } # end interaction IF
+    # End: Multi interaction Plot ----
+    
+    # create a copy for output
+    res.multi.out <- copy(res.multivar)
+    res.multi.out$tmp.sig <- NULL
+    res.multi.out$tmp.p.adj <- NULL
+    
+    # save results for output
+    output$res.multivar <- renderDataTable(res.multi.out, options = list(pageLength = 10))
+    output$res.int.multivar <- renderDataTable(res.multi.int.out, options = list(pageLength = 10))
+    values$res.multivar <- res.multi.out
+    values$res.int.multivar <- res.multi.int.out
+    values$annot.c <- annot.c
     
     # output methods text
-    output$multivar.description <- renderText({
-      validate(
-        need(!is.null(multivar.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$multivar.description <- renderText({
+    #   validate(
+    #     need(!is.null(multivar.description),
+    #          message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     message("Finishing")
     
@@ -781,7 +968,16 @@ server <- function(input, output, session) {
   output$download.multi <- downloadHandler(
     filename = "Multivariable_Association_Results.csv",
     content = function(file) {
-        fwrite(isolate(values$res.multivar), file)
+      fwrite(isolate(values$res.multivar), file)
+    }
+  )
+  
+  
+  # download data
+  output$download.int.multi <- downloadHandler(
+    filename = "Multivariable_Interaction_Results.csv",
+    content = function(file) {
+      fwrite(isolate(values$res.int.multivar), file)
     }
   )
   
@@ -831,7 +1027,6 @@ server <- function(input, output, session) {
     message(missingness.cutoff)
     message(mandatory.inclusion)
     
-    #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
       
@@ -881,9 +1076,8 @@ server <- function(input, output, session) {
       )
       
     }) # end progression indication
-    #=======================
     
-    #### PLOT ####
+    # Plot ----
     plot <- plot_multivar(data = all.multi)
     output$multi.plot <- renderPlot({
       validate(
@@ -893,9 +1087,7 @@ server <- function(input, output, session) {
         )
       )
       plot
-      })
-    
-    # output$multi.plot <- renderPlot(plot)
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # output
     values$all.multi <- all.multi
@@ -930,11 +1122,11 @@ server <- function(input, output, session) {
     selection.description <- NULL
     
     # output methods text
-    output$selection.description <- renderText({
-      validate(
-        need(!is.null(selection.description), message = "This is not yet available. See future Updates for a detailed description.")
-      )
-    })
+    # output$selection.description <- renderText({
+    #   validate(
+    #     need(!is.null(selection.description), message = "This is not yet available. See future Updates for a detailed description.")
+    #   )
+    # })
     
     # Output
     output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
@@ -948,31 +1140,31 @@ server <- function(input, output, session) {
   output$download.full.model.r.squared <- downloadHandler(
     filename = "Covariate_Selection.csv",
     content = function(file) {
-        fwrite(isolate(values$full.model.r.squared), file)
+      fwrite(isolate(values$full.model.r.squared), file)
     }
   )
   output$download.annot.c <- downloadHandler(
     filename = "Covariate_Annotation.csv",
     content = function(file) {
-        fwrite(isolate(values$annot.c), file)
+      fwrite(isolate(values$annot.c), file)
     }
   )
   output$download.annot.m <- downloadHandler(
     filename = "Metabolite_Annotation.csv",
     content = function(file) {
-        fwrite(isolate(values$annot.m), file)
+      fwrite(isolate(values$annot.m), file)
     }
   )
   output$download.dat <- downloadHandler(
     filename = "Preprocessed_Data.csv",
     content = function(file) {
-        fwrite(isolate(values$dat), file)
+      fwrite(isolate(values$dat), file)
     }
   )
   output$download.all.multi <- downloadHandler(
     filename = "Association_Results.csv",
     content = function(file) {
-        fwrite(isolate(values$all.multi), file)
+      fwrite(isolate(values$all.multi), file)
     }
   )
 }

@@ -20,7 +20,10 @@ test_r2_distribution <- function(dat,
   )
   
   if(n.cohorts == 1){
-    res <- NULL
+    res.out <- data.table(term=tmp1$term,
+                          friedman.or.wicoxon.test = "only_one_cohort")
+    return(res.out)
+    
   } else if(n.cohorts == 2){
     
     # wilcoxon test

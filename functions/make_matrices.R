@@ -1,19 +1,20 @@
-make_matrices <- function(st2,
+make_matrices <- function(dat,
                          clustmethod = "ward.D2",
                          r2Col,
-                         pCol){
+                         pCol,
+                         significant){
   
-  st2$pHierBonf <- st2[[pCol]]
-  st2[,significant:=pHierBonf<=0.05]
-  st2[,.N,significant]
-  
-  setnames(x = st2, old = c(r2Col, pCol), new = c("r2Col", "pCol"), skip_absent = T)
+  # st2$pHierBonf <- st2[[pCol]]
+  # st2[,significant:=pHierBonf<=0.05]
+  # st2[,.N,significant]
+  st2 <- copy(dat)
+  setnames(x = st2, old = c(r2Col, pCol, significant), new = c("r2Col", "pCol", "significant"), skip_absent = T)
   
   st2max = st2[,.( maxR2            = max(r2Col, na.rm = T),
                    maxIsSignificant = significant[r2Col==max(r2Col)][1],
                    nStudies         = .N,
                    direction        = sign(estimate[r2Col == max(r2Col)][1]),
-                   pcorrMaxR2       = pHierBonf[r2Col==max(r2Col)][1]),
+                   pcorrMaxR2       = pCol[r2Col==max(r2Col)][1]),
                by = .(metab, term)]
   
 

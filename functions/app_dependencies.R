@@ -9,6 +9,7 @@ necessary.packages <- c(
   "ggplot2",
   "magrittr",
   "visNetwork",
+  "lmtest",
   "scales")
 
 # check for installed packages and install them if necessary
@@ -47,6 +48,7 @@ library("magrittr")
 library("visNetwork")
 library("scales")
 library("sva")
+library("lmtest")
 
 # shiny Options - enable larger Upload sizes
 options(shiny.maxRequestSize=30*1024^2) 
@@ -54,6 +56,9 @@ options(shiny.maxRequestSize=30*1024^2)
 # Functions ---------------------------------------------------------------
 source("functions/test_r2_distribution.R")
 source("functions/custom_corrplot.R")
+source("functions/format_for_custom_corrplot.R")
+source("functions/interaction_partial_r_squared_multi.R")
+source("functions/interaction_partial_r_squared_uni.R")
 source("functions/make_matrices.R")
 source("functions/network_plot.R")
 source("functions/plot_correlation.R")

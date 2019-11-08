@@ -102,15 +102,21 @@ pre_process_metabolites <- function(
     
     # iterate through the data (in each cohort)
     # bcbe <- before-combat batch effects
-    bcbe <- dat[, .(kruskall.wallis.p = sapply(.SD, function(x){
-      check_batch_effects(Metabolite = x,
-                          Batch = batch)
-    })),
-    .SDcols = m.cols,
-    by = cohort]
     
-    # enter into annotation table
-    annot.m[, k.w.p.value.before.Combat := bcbe$kruskall.wallis.p]
+    if(length(unique(dat$batch))>1){
+      
+      bcbe <- dat[, .(kruskall.wallis.p = sapply(.SD, function(x){
+        check_batch_effects(Metabolite = x,
+                            Batch = batch)
+      })),
+      .SDcols = m.cols,
+      by = cohort]
+      
+      # enter into annotation table
+      annot.m[, k.w.p.value.before.Combat := bcbe$kruskall.wallis.p]
+    } else {
+      annot.m[, k.w.p.value.before.Combat := "no_batches"]
+    }
     
     
     # "Batch Adjustment"
