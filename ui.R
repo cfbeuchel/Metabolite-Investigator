@@ -246,14 +246,14 @@ ui <-  navbarPage(
                                      p("In this step, each metabolite will be associated with each covariate in in a univariate and univariable
                          linear model seperately in each cohort. Multiple testing correction for each cohort will be applied according to the selection in the drop down menu. Test statistics are downloadable as .csv file. Provided visualizations are a boxplot of the distributions of the explained variances for each factor in each cohort, a heatmap of the highest explained variance (signed by the direction of the effect estimate) of each factor for each metabolite over all cohorts and a (non-)hierarchical network with metabolites and factors as nodes and the maximum explained variance as edges. Further, the difference in the distribution of explained variance between cohorts will be quantified by Friedman test and when two distributions are compared via the Wilcoxon signed rank test. Benjamini-Hochberg correction for multiple testing will be applied afterwards."),
                                      tags$hr(),
-                                     h5("Cohort Interaction Test"),
-                                     p("Presense of univariable interaction terms of the cohort with each factor is analysed for each metabolite. "),
+                                     h5("Factor-Cohort Interaction Test"),
+                                     p("In Case of more than one cohort data: Presence of univariable interaction terms of the cohort with each factor is analysed for each metabolite. For this, an interaction effect for the cohort ID is added to the univariable model. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
                                      textOutput("univar.description")),
-                            tabPanel("Boxplot", plotOutput("plot.univar", width = "70%")),
-                            tabPanel("Heatmap", plotOutput("heat.univar", width = "70%")),
-                            tabPanel("Network", visNetworkOutput("network.univar")),
+                            tabPanel("Boxplot", plotOutput("plot.univar")), #, width = "70%"
+                            tabPanel("Heatmap", plotOutput("heat.univar")), #, width = "70%"
+                            tabPanel("Network", visNetworkOutput("network.univar", width = "1200px",height = "800px")),
                             tabPanel("Results", dataTableOutput("res.univar")),
-                            tabPanel("Interaction Heatmap", plotOutput("heat.int.univar", width = "70%")),
+                            tabPanel("Interaction Heatmap", plotOutput("heat.int.univar")), #, width = "70%"
                             tabPanel("Interaction Results", dataTableOutput("res.int.univar"))
                 )
       )
@@ -299,7 +299,7 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                          by pressing the button. You may then select and thus exclude any of the highly correlating factors from the menu below and exclude 
                          them from further analysis. The selection can be reset by pressing the `Reset Factor Exclusion`-button")
                             ),
-                            tabPanel("Correlation", plotOutput("correlation.plot", width = "400px")), #  "700px" 
+                            tabPanel("Correlation", plotOutput("correlation.plot")), #  "700px" , width = "400px"
                             tabPanel("Covariate Annotation", dataTableOutput("preview.corr.annot.c"))
                 )
       )  
@@ -342,13 +342,15 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                                      h4("Methods Description"),
                                      tags$hr(),
                                      p("All factors not removed for high correlation will be regressed against each metabolite in each cohort in a multivariable linear regression model. Correction for multiple testing will be applied according to the selection from the drop-down menu. Visualizations are the same as in the univariable association step with the difference that the partial explained variance of each factor depending on all the other factors will be provided in addition to the adjusted R2 of the full model. The partial-R2 of a factor is computed as the difference of the R2 of the model including and the R2 of a model excluding the factor in question."),
+                                     h5("Factor-Cohort Interaction Test"),
+                                     p("In Case of more than one cohort data: Similar to the cohort interaction test during the univariable association step of the interaction of each factor with the cohort is analysed for each metabolite in a multivariable linear model. For this, an interaction effect for the cohort ID is added to the multivariable model for each predictor. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
                                      tags$hr(),
                                      textOutput("multivar.description")),
-                            tabPanel("Boxplot", plotOutput("plot.multivar", width = "70%")),
-                            tabPanel("Heatmap", plotOutput("heat.multivar", width = "70%")),
-                            tabPanel("Network", visNetworkOutput("network.multivar")),
+                            tabPanel("Boxplot", plotOutput("plot.multivar")),
+                            tabPanel("Heatmap", plotOutput("heat.multivar")),
+                            tabPanel("Network", visNetworkOutput("network.multivar", width = "1200px",height = "800px")),
                             tabPanel("Results", dataTableOutput("res.multivar")),
-                            tabPanel("Interaction Heatmap", plotOutput("heat.int.multivar", width = "70%")),
+                            tabPanel("Interaction Heatmap", plotOutput("heat.int.multivar")),
                             tabPanel("Interaction Results", dataTableOutput("res.int.multivar"))
                 )
       )

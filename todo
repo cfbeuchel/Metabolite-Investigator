@@ -2,7 +2,6 @@
 # --> check the #TODO# tag in the scripts
 
 * Multiple testing during interaction based on user-chosen method -> DONE
-* what missing rate to accept during multivariable association -> no
 * add UI component (only plotting in new tab) -> DONE
 * add server component -> DONE
 * add output to results -> DONE

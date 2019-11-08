@@ -430,13 +430,23 @@ server <- function(input, output, session) {
                                       data = dat)
       
       # Interaction ----
-      interaction.univar <- interaction_partial_r_squared_uni(
-        responses = m.cols,
-        predictors = c.cols,
-        dat = dat,
-        verbose = TRUE
-      )
-      
+      # only when one or more cohorts are present!
+      if(length(unique(dat$cohort))>1){
+        
+        interaction.univar <- interaction_partial_r_squared_uni(
+          responses = m.cols,
+          predictors = c.cols,
+          dat = dat,
+          verbose = TRUE
+        )
+        
+        # set variable for successful completion of step
+        interaction.test <- TRUE
+        
+      } else{
+        interaction.univar <- "Only one cohort. No Interactions to test!"
+        interaction.test <- FALSE
+      }
     }) 
     
     res.univar <- generic_multiple_testing_correction(
@@ -470,13 +480,14 @@ server <- function(input, output, session) {
                    rSquaredColumn = "r.squared",
                    pColumn = p.col,
                    cohort = input$network.uni.select,
-                   hierarchicalNetwork = input$network.uni.hierarch)})
+                   hierarchicalNetwork = input$network.uni.hierarch)
+      })
     
     # plot the unviaraiable results
     output$plot.univar <- renderPlot({
       plot_univar(data = copy(res.univar), 
                   rSquaredCol = "r.squared")
-      })
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # reformat results for heatmap
     uni.max.matrix <- make_matrices(dat = res.univar,
@@ -498,62 +509,67 @@ server <- function(input, output, session) {
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )
-    })
+    },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
     
     # interaction Plot ----
-    
-    # needed for by in the multiple testing cohort
-    interaction.univar$cohort <- "dummy"
-    
-    # lr test p als pvalue in die function
-    interaction.univar$p.value <- interaction.univar$lr.test.p
-    
-    interaction.univar <- generic_multiple_testing_correction(
-      data = interaction.univar,
-      correctionMethod = multiple.testing)
-    
-    # plotting formatting
-    uni.int.form <- format_for_custom_corrplot(
-      metabCol = "metab",
-      covarCol = "term",
-      r2Col = "interaction.r.squared",
-      pCol = "tmp.p.adj", 
-      sigCol = "tmp.sig",
-      dat = interaction.univar,
-      clustMethod = "ward.D2")
-    
-    rowOrderMaxR2 = rownames(uni.int.form$r2matrix)
-    colOrderMaxR2 = colnames(uni.int.form$r2matrix)
-    
-    output$heat.int.univar <- renderPlot({
+    if(interaction.test==TRUE){
       
-      # plot 
-      custom_corrplot(uni.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
-                      p.mat = uni.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
-                      hclust.method = "ward.D2",
-                      method="color",
-                      is.corr = F, 
-                      insig = "label_sig", 
-                      sig.level=0.05,
-                      pch.col = rgb(0,0,0,0.66),
-                      # pch.cex = 1.0,
-                      # tl.cex = 0.6,
-                      col = colorRampPalette(c("red", "white", "#006027"))(20),
-                      title = "Univariable Interaction factor*cohort signed R2",
-                      mar=c(0, 0, 2, 0),
-                      cl.length = 11)
+      # needed for by in the multiple testing cohort
+      interaction.univar$cohort <- "dummy"
       
-    })
+      # lr test p als pvalue in die function
+      interaction.univar$p.value <- interaction.univar$lr.test.p
+      
+      interaction.univar <- generic_multiple_testing_correction(
+        data = interaction.univar,
+        correctionMethod = multiple.testing)
+      
+      # plotting formatting
+      uni.int.form <- format_for_custom_corrplot(
+        metabCol = "metab",
+        covarCol = "term",
+        r2Col = "interaction.r.squared",
+        pCol = "tmp.p.adj", 
+        sigCol = "tmp.sig",
+        dat = interaction.univar,
+        clustMethod = "ward.D2")
+      
+      rowOrderMaxR2 = rownames(uni.int.form$r2matrix)
+      colOrderMaxR2 = colnames(uni.int.form$r2matrix)
+      
+      output$heat.int.univar <- renderPlot({
+        
+        # plot 
+        custom_corrplot(uni.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
+                        p.mat = uni.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
+                        hclust.method = "ward.D2",
+                        method="color",
+                        is.corr = F, 
+                        insig = "label_sig", 
+                        sig.level=0.05,
+                        pch.col = rgb(0,0,0,0.66),
+                        # pch.cex = 1.0,
+                        # tl.cex = 0.6,
+                        col = colorRampPalette(c("red", "white", "#006027"))(20),
+                        title = "Univariable Interaction factor*cohort signed R2",
+                        mar=c(0, 0, 2, 0),
+                        cl.length = 11)
+      },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), 
+      height = 75 * length(c.cols))
+      
+      # remove tmp cols
+      res.uni.int.out <- copy(interaction.univar)
+      res.uni.int.out$p.value <- NULL
+      res.uni.int.out$tmp.sig <- NULL
+      res.uni.int.out$tmp.p.adj <- NULL
+      res.uni.int.out$cohort <- NULL
+      
+    }else{
+      res.uni.int.out <- copy(interaction.univar)
+    } #  end interaction IF statement
     
     # create a copy for output
     res.uni.out <- copy(res.univar)
-    res.uni.int.out <- copy(interaction.univar)
-    
-    # remove tmp cols
-    res.uni.int.out$p.value <- NULL
-    res.uni.int.out$tmp.sig <- NULL
-    res.uni.int.out$tmp.p.adj <- NULL
-    res.uni.int.out$cohort <- NULL
     res.uni.out$tmp.sig <- NULL
     res.uni.out$tmp.p.adj <- NULL
     
@@ -778,12 +794,23 @@ server <- function(input, output, session) {
         correctionMethod = multiple.testing)
       
       # Interaction ----
-      interaction.multivar <- interaction_partial_r_squared_multi(
-        responses = m.cols,
-        predictors = c.cols,
-        dat = dat,
-        verbose = TRUE
-      )
+      # only when one or more cohorts are present!
+      if(length(unique(dat$cohort))>1){
+        
+        interaction.multivar <- interaction_partial_r_squared_multi(
+          responses = m.cols,
+          predictors = c.cols,
+          dat = dat,
+          verbose = TRUE
+        )
+        
+        # set variable for successful completion of step
+        interaction.test <- TRUE
+        
+      } else{
+        interaction.multivar <- "Only one cohort. No Interactions to test!"
+        interaction.test <- FALSE
+      }
       
     }) # end progression indication
     
@@ -823,7 +850,7 @@ server <- function(input, output, session) {
     # plot the multivariable results
     output$plot.multivar <- renderPlot({
       plot_univar(data = copy(res.multivar), rSquaredCol = "term.r.squared")
-      })
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # reformat results for heatmap
     multi.max.matrix <- make_matrices(dat = res.multivar,
@@ -845,68 +872,70 @@ server <- function(input, output, session) {
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )
-    })
+    },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
     
     # Multi interaction Plot ----
-    
-    # needed for by in the multiple testing cohort
-    interaction.multivar$cohort <- "dummy"
-    
-    # lr test p als pvalue in die function
-    interaction.multivar$p.value <- interaction.multivar$lr.test.p
-    
-    interaction.multivar <- generic_multiple_testing_correction(
-      data = interaction.multivar,
-      correctionMethod = multiple.testing)
-    
-    # plotting formatting
-    multi.int.form <- format_for_custom_corrplot(
-      metabCol = "metab",
-      covarCol = "term",
-      r2Col = "interaction.r.squared",
-      pCol = "tmp.p.adj", 
-      sigCol = "tmp.sig",
-      dat = interaction.multivar,
-      clustMethod = "ward.D2")
-    
-    rowOrderMaxR2 = rownames(multi.int.form$r2matrix)
-    colOrderMaxR2 = colnames(multi.int.form$r2matrix)
-    
-    output$heat.int.multivar <- renderPlot({
+    if(interaction.test==TRUE){
       
-      # plot 
-      custom_corrplot(multi.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
-                      p.mat = multi.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
-                      hclust.method = "ward.D2",
-                      method="color",
-                      is.corr = F, 
-                      insig = "label_sig", 
-                      sig.level=0.05,
-                      pch.col = rgb(0,0,0,0.66),
-                      # pch.cex = 1.0,
-                      # tl.cex = 0.6,
-                      col = colorRampPalette(c("red", "white", "#006027"))(20),
-                      title = "Multivariable Interaction factor*cohort signed R2",
-                      mar=c(0, 0, 2, 0),
-                      cl.length = 11)
+      # needed for by in the multiple testing cohort
+      interaction.multivar$cohort <- "dummy"
       
-    })
-    
-    
+      # lr test p als pvalue in die function
+      interaction.multivar$p.value <- interaction.multivar$lr.test.p
+      
+      interaction.multivar <- generic_multiple_testing_correction(
+        data = interaction.multivar,
+        correctionMethod = multiple.testing)
+      
+      # plotting formatting
+      multi.int.form <- format_for_custom_corrplot(
+        metabCol = "metab",
+        covarCol = "term",
+        r2Col = "interaction.r.squared",
+        pCol = "tmp.p.adj", 
+        sigCol = "tmp.sig",
+        dat = interaction.multivar,
+        clustMethod = "ward.D2")
+      
+      rowOrderMaxR2 = rownames(multi.int.form$r2matrix)
+      colOrderMaxR2 = colnames(multi.int.form$r2matrix)
+      
+      output$heat.int.multivar <- renderPlot({
+        
+        # plot 
+        custom_corrplot(multi.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
+                        p.mat = multi.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
+                        hclust.method = "ward.D2",
+                        method="color",
+                        is.corr = F, 
+                        insig = "label_sig", 
+                        sig.level=0.05,
+                        pch.col = rgb(0,0,0,0.66),
+                        # pch.cex = 1.0,
+                        # tl.cex = 0.6,
+                        col = colorRampPalette(c("red", "white", "#006027"))(20),
+                        title = "Multivariable Interaction factor*cohort signed R2",
+                        mar=c(0, 0, 2, 0),
+                        cl.length = 11)
+        
+      },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
+      
+      # remove tmp cols
+      res.multi.int.out <- copy(interaction.multivar)
+      res.multi.int.out$p.value <- NULL
+      res.multi.int.out$tmp.sig <- NULL
+      res.multi.int.out$tmp.p.adj <- NULL
+      res.multi.int.out$cohort <- NULL
+      
+    }else{
+    res.multi.int.out <- copy(interaction.multivar)
+    } # end interaction IF
+    # End: Multi interaction Plot ----
     
     # create a copy for output
     res.multi.out <- copy(res.multivar)
-    res.multi.int.out <- copy(interaction.multivar)
-
-    # remove tmp cols
-    res.multi.int.out$p.value <- NULL
-    res.multi.int.out$tmp.sig <- NULL
-    res.multi.int.out$tmp.p.adj <- NULL
-    res.multi.int.out$cohort <- NULL
     res.multi.out$tmp.sig <- NULL
     res.multi.out$tmp.p.adj <- NULL
-    
-    # End: Multi interaction Plot ----
     
     # save results for output
     output$res.multivar <- renderDataTable(res.multi.out, options = list(pageLength = 10))
@@ -998,7 +1027,6 @@ server <- function(input, output, session) {
     message(missingness.cutoff)
     message(mandatory.inclusion)
     
-    #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
       
@@ -1059,7 +1087,7 @@ server <- function(input, output, session) {
         )
       )
       plot
-    })
+    },width = 75*length(c.cols), height = 75 * length(c.cols))
     
     # output
     values$all.multi <- all.multi
