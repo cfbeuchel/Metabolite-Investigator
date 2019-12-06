@@ -53,14 +53,32 @@ server <- function(input, output, session) {
     
     # covar
     values$input.covar <- (fread("data/190307_simu_factors.csv"))
-    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
+    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10),)
     
     # Mergin buttons
     # Update select input immediately after clicking on the action button.
-    updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
-    updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
-    updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
-    updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+    updateSelectInput(
+      session,
+      "metab.id",
+      "Select Metabolite ID Column",
+      choices = names(values$input.metab),
+      selected = names(values$input.metab)[3])
+    updateSelectInput(
+      session, 
+      "cohort.col",
+      "Select Metabolite Cohort ID Column",
+      choices = names(values$input.metab), 
+      selected = names(values$input.metab)[1])
+    updateSelectInput(
+      session, 
+      "batch.col",
+      "Select Metabolite Batch ID Column",
+      choices = names(values$input.metab), 
+      selected = names(values$input.metab)[2])
+    updateSelectInput(session,
+                      "covar.id",
+                      "Select Covariate ID Column", 
+                      choices = names(values$input.covar))
     
     # output some text when using example data
     output$preview.text <- renderText({"Using example data (2 cohorts with each 5000 samples, 7 metabolites and 6 factors) for analysis."})

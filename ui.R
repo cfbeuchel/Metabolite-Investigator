@@ -8,6 +8,7 @@ ui <-  navbarPage(
   
   #=== Panels ===#
   
+  # Description ----
   tabPanel("Description", {
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -45,6 +46,7 @@ ui <-  navbarPage(
       )
     )
   }),
+  # 1.1 Data Upload ----
   tabPanel("1.1 Data Upload",{
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -52,7 +54,7 @@ ui <-  navbarPage(
                    helpText("Click here to load example data for a test run."),
                    actionButton(inputId = "use.example", label = "Use Example Data", icon = icon("play-circle")),
                    
-                   # Horizontal line ----
+                   # Horizontal line
                    tags$hr(),
                    
                    # dataTableOutput('mytable')
@@ -65,20 +67,20 @@ ui <-  navbarPage(
                                '.csv',
                                '.tsv'
                              )),
-                   # Input: Select separator ----
+                   # Input: Select separator
                    radioButtons("sep.covar", "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
                                 selected = ","),
                    
-                   # Input: Select quotes ----
+                   # Input: Select quotes
                    radioButtons("quote.covar", "Quote",
                                 choices = c(None = "",
                                             "Double Quote" = '"',
                                             "Single Quote" = "'"),
                                 selected = '"'),
-                   # Horizontal line ----
+                   # Horizontal line
                    tags$hr(),
                    
                    # dataTableOutput('mytable')
@@ -92,14 +94,14 @@ ui <-  navbarPage(
                                '.tsv'
                              )),
                    
-                   # Input: Select separator ----
+                   # Input: Select separator
                    radioButtons("sep.metab", "Separator",
                                 choices = c(Comma = ",",
                                             Semicolon = ";",
                                             Tab = "\t"),
                                 selected = ","),
                    
-                   # Input: Select quotes ----
+                   # Input: Select quotes 
                    radioButtons("quote.metab", "Quote",
                                 choices = c(None = "",
                                             "Double Quote" = '"',
@@ -121,6 +123,7 @@ ui <-  navbarPage(
       )
     )
   }),
+  # 1.2 Data Prep ----
   tabPanel("1.2 Data Preparation",{
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -157,6 +160,7 @@ ui <-  navbarPage(
       )
     )
   }),
+  # 2 Data Pre-Pro ----
   tabPanel("2. Data Pre-Processing", {
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -206,6 +210,7 @@ ui <-  navbarPage(
       )
     )
   }),
+  # 3 Univariate Assoc ----
   tabPanel("3. Univariable Association",{
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -247,7 +252,7 @@ ui <-  navbarPage(
                          linear model seperately in each cohort. Multiple testing correction for each cohort will be applied according to the selection in the drop down menu. Test statistics are downloadable as .csv file. Provided visualizations are a boxplot of the distributions of the explained variances for each factor in each cohort, a heatmap of the highest explained variance (signed by the direction of the effect estimate) of each factor for each metabolite over all cohorts and a (non-)hierarchical network with metabolites and factors as nodes and the maximum explained variance as edges. Further, the difference in the distribution of explained variance between cohorts will be quantified by Friedman test and when two distributions are compared via the Wilcoxon signed rank test. Benjamini-Hochberg correction for multiple testing will be applied afterwards."),
                                      tags$hr(),
                                      h5("Factor-Cohort Interaction Test"),
-                                     p("In Case of more than one cohort data: Presence of univariable interaction terms of the cohort with each factor is analysed for each metabolite. For this, an interaction effect for the cohort ID is added to the univariable model. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
+                                     p("In Case of more than one cohort data: Presence of univariable interaction terms of the cohort with each factor is analysed for each metabolite and displayed as a heatmap. For this, an interaction effect for the cohort ID is added to the univariable model. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
                                      textOutput("univar.description")),
                             tabPanel("Boxplot", plotOutput("plot.univar")), #, width = "70%"
                             tabPanel("Heatmap", plotOutput("heat.univar")), #, width = "70%"
@@ -259,6 +264,7 @@ ui <-  navbarPage(
       )
     )
   }),
+  # 4 Correlation Check ----
   tabPanel("4. Correlation Check", {
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -305,6 +311,7 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
       )  
     )
   }),
+  # 5 Multivariable Assoc ----
   tabPanel("5. Multivariable Association", {
     sidebarLayout(
       sidebarPanel(width = 3,
@@ -357,6 +364,7 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
       )
     )
   }),
+  # 6. Covariate Selection ----
   tabPanel("6. Covariate Selection", {
     sidebarLayout(
       sidebarPanel(width = 3,

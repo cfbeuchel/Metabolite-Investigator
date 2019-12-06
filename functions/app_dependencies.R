@@ -1,31 +1,6 @@
-# which packages do I need for this app
-necessary.packages <- c(
-  "BiocManager",
-  "shinythemes",
-  "data.table",
-  "corrplot",
-  "sva",
-  "shiny",
-  "ggplot2",
-  "magrittr",
-  "visNetwork",
-  "lmtest",
-  "scales")
-
-# check for installed packages and install them if necessary
-installed <- installed.packages()
-needed <- necessary.packages
-to.install <- needed[!(needed %in% installed[,1])]
-rm(installed)
-# if(length(to.install)!=0){
-#   if("sva" %in% to.install){
-#     install.packages("BiocManager")
-# 
-# 
-#     BiocManager::install("sva")
-#   }
-#   install.packages(to.install[to.install!="sva"], repos = "https://cran.uni-muenster.de/")
-# }
+# install dependencies when using github package
+source("functions/install_dependencies.R") # REMOVE_IN_GITLAB_TAG
+install_dependencies() # REMOVE_IN_GITLAB_TAG
 
 # Important dependency for hosting on shinyapps.io -----------------------
 options(repos = BiocManager::repositories())
@@ -47,7 +22,6 @@ library("ggplot2")
 library("magrittr")
 library("visNetwork")
 library("scales")
-library("sva")
 library("lmtest")
 
 # shiny Options - enable larger Upload sizes
@@ -85,3 +59,6 @@ source("functions/multiple_testing_correction.R")
 source("functions/generic_multiple_testing_correction.R")
 source("functions/remaining_covariates.R")
 source("functions/partial_r_squared_excluded_covars.R")
+
+# Thx @Jonas Wagner for this simple solution to the weird empty plot bug
+pdf(NULL)

@@ -53,7 +53,7 @@ interaction_partial_r_squared_multi <- function(responses,
     my.full.r.squared <- my.full.model$r.squared
     my.full.r.squared.adj <- my.full.model$adj.r.squared
     my.full.r.squared.adj[my.full.r.squared.adj < 0] <- 0
-    my.reduced.r.squared <- my.reduced.model$r.squared
+    my.reduced.r.squared <- my.reduced.model$adj.r.squared
     
     # clean output
     res <- as.data.frame(coefficients(my.full.model))
@@ -78,7 +78,7 @@ interaction_partial_r_squared_multi <- function(responses,
     }
     
     # substract r-squares to get explained variance of my.covar
-    my.r.squared <- my.full.r.squared - my.reduced.r.squared
+    my.r.squared <- my.full.r.squared.adj - my.reduced.r.squared
     my.r.squared[my.r.squared<0] <- 0
     
     # consolidate output
