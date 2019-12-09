@@ -1,6 +1,7 @@
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
+  # Setup ----
   # load dependencies
   source(file = "functions/app_dependencies.R")
   
@@ -37,13 +38,13 @@ server <- function(input, output, session) {
                metabolite.3 = rnorm(12))
   }, options = list(pageLength = 10))
   
-  # Example Data ------------------------------------------------------------
+  # Example Data ----
   observeEvent(input$use.example, {
     
     # check for files
     validate(
       need(expr = file.exists("data/190307_simu_metabs.csv") & 
-             file.exists("data/190307_simu_factors.csv"),
+             file.exists("data/191209_simu_factors.csv"),
            message = "No example data found! Will be uploaded soon.")
     )
     
@@ -52,8 +53,8 @@ server <- function(input, output, session) {
     output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
     # covar
-    values$input.covar <- (fread("data/190307_simu_factors.csv"))
-    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10),)
+    values$input.covar <- (fread("data/191209_simu_factors.csv"))
+    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
     # Mergin buttons
     # Update select input immediately after clicking on the action button.
@@ -84,6 +85,7 @@ server <- function(input, output, session) {
     output$preview.text <- renderText({"Using example data (2 cohorts with each 5000 samples, 7 metabolites and 6 factors) for analysis."})
   })
   
+  # Data Preview ----
   # preview covar data
   output$preview.covar <- renderDataTable({
     req(input$input.covar)
@@ -93,8 +95,7 @@ server <- function(input, output, session) {
                              sep = input$sep.covar,
                              quote = input$quote.covar)
         input.covar
-      },
-      error = function(e) {
+      }, error = function(e) {
         stop(safeError(e))
       }
     )
@@ -109,15 +110,14 @@ server <- function(input, output, session) {
                              sep = input$sep.metab,
                              quote = input$quote.metab)
         input.metab
-      },
-      error = function(e) {
+      }, error = function(e) {
         stop(safeError(e))
       }
     )
   }, options = list(pageLength = 10))
   
   
-  # Upload Metabolites ------------------------------------------------------
+  # Upload ----
   observeEvent({
     input$input.metab
   },{
@@ -134,7 +134,6 @@ server <- function(input, output, session) {
   })
   
   
-  # Upload Covariates -------------------------------------------------------
   observeEvent({
     input$input.covar
   },{
@@ -148,7 +147,7 @@ server <- function(input, output, session) {
     output$covar.upload.success <- renderText("Covariate data uploaded successfully. Please make sure it is the right data.")
   })
   
-  # Covariate/Metabolite column selection -----------------------------------
+  # Covariate/Metabolite column selection ----
   observeEvent(input$rest.covar,{
     if(input$rest.covar==F){
       updateSelectInput(session,
@@ -168,7 +167,7 @@ server <- function(input, output, session) {
   })
   
   
-  # Data Merging -----------------------------------
+  # Data Merging ----
   # rename metab/covar columns
   
   observeEvent(input$merge.button,{
@@ -222,7 +221,7 @@ server <- function(input, output, session) {
       )
     }, options = list(pageLength = 10))
     
-    # Merging -----------------------------------------------------------------
+    # Merging function ----
     results <- data_merging(covariateData = values$input.covar,
                             metaboliteData = values$input.metab,
                             covariateID = values$covar.id,
@@ -248,7 +247,7 @@ server <- function(input, output, session) {
     
   })
   
-  # Data preprocessing ------------------------------------------------------
+  # Data preprocessing ----
   observeEvent(input$button.prepro, {
     
     # validate merged data
@@ -269,7 +268,7 @@ server <- function(input, output, session) {
     c.cols <- isolate(values$c.cols)
     message("Starting pre-pro...")
     
-    # start with metab annotation -------------------------
+    # start with metab annotation 
     missings.abs.m <- dat[, sapply(.SD, function(x){
       x <- is.na(x)
       sum(x)
@@ -298,8 +297,6 @@ server <- function(input, output, session) {
                           zero.inflation.absolute = zero.infl.abs.m$V1,
                           zero.infaltion.relative = zero.infl.rel.m$V1)
     
-    #================================================================
-    
     # decide on prepro yes/no
     if(input$button.choose.prepro==T){
       pre.process.metabolites <- T 
@@ -307,7 +304,6 @@ server <- function(input, output, session) {
       pre.process.metabolites <- F
     }
     
-    #=======================
     # Add progress Indicator
     withProgress(message = 'Crunching the numbers', value = 0, {
       
@@ -331,13 +327,12 @@ server <- function(input, output, session) {
         covariateColumns = c.cols)
       
     }) # end of progress indication
-    #=======================
-    
+
     # re-assign output from prepro function
     annot.m <- res$annot.m
     dat <- res$dat
     
-    # covar annotation ------------------
+    # Covariate annotation ----
     # calculate missings
     missings.abs.c <- dat[, sapply(.SD, function(x){
       x <- is.na(x)
@@ -366,7 +361,7 @@ server <- function(input, output, session) {
     # display some of the data
     output$prepro.success <- renderText("Pre-processing of data was successful!")
     
-    # Preview --------------------------
+    # Result Preview ----
     # if(input$button.preview.prepro==T){
     # show annotation table
     output$prepro.annot.m <- renderDataTable({
@@ -409,7 +404,7 @@ server <- function(input, output, session) {
     # })
   }) # end of prepro
   
-  # Univariable Association -------------------------------------------------
+  # Univariable Association ----
   observeEvent(input$univar.assoc.button, {
     
     # validate merged data
@@ -529,7 +524,7 @@ server <- function(input, output, session) {
       )
     },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
     
-    # interaction Plot ----
+    # Interaction Plot ----
     if(interaction.test==TRUE){
       
       # needed for by in the multiple testing cohort
@@ -591,7 +586,7 @@ server <- function(input, output, session) {
     res.uni.out$tmp.sig <- NULL
     res.uni.out$tmp.p.adj <- NULL
     
-    # End: interaction Plot ----
+    # End: interaction Heatmap ----
     
     # save results for output
     output$res.univar <- renderDataTable(res.uni.out, options = list(pageLength = 10))
@@ -636,7 +631,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # Correlation Check -------------------------------------------------------
+  # Correlation Check ----
   # observe Slider and take values
   observeEvent(input$corr.cut.slider,{
     values$slider.input <- input$corr.cut.slider
@@ -711,7 +706,7 @@ server <- function(input, output, session) {
   })
   
   
-  # Correlation Plot --------------------------------------------------------
+  # Correlation Plot ----
   observeEvent(input$plot.corr.select, {
     req(values$dat)
     cohort <- input$plot.corr.select
@@ -726,7 +721,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # Exlude covariates -------------------------------------------------------
+  # Exlude covariates
   # pressing exclude button
   observeEvent(input$exclude.corr.select,{
     
@@ -769,7 +764,7 @@ server <- function(input, output, session) {
     values$annot.c <- annot.c
   })
   
-  # Multivariable Association -----------------------------------------------
+  # Multivariable Association ----
   observeEvent(input$multivar.assoc.button, {
     
     # validate merged data
@@ -811,7 +806,7 @@ server <- function(input, output, session) {
         data = res.multivar,
         correctionMethod = multiple.testing)
       
-      # Interaction ----
+      # Multivariable Interaction ----
       # only when one or more cohorts are present!
       if(length(unique(dat$cohort))>1){
         
@@ -892,7 +887,7 @@ server <- function(input, output, session) {
       )
     },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), height = 75 * length(c.cols))
     
-    # Multi interaction Plot ----
+    # Multivariable Interaction Heatmap ----
     if(interaction.test==TRUE){
       
       # needed for by in the multiple testing cohort
@@ -948,7 +943,7 @@ server <- function(input, output, session) {
     }else{
     res.multi.int.out <- copy(interaction.multivar)
     } # end interaction IF
-    # End: Multi interaction Plot ----
+    # End: Multi interaction Plot
     
     # create a copy for output
     res.multi.out <- copy(res.multivar)
@@ -999,7 +994,7 @@ server <- function(input, output, session) {
     }
   )
   
-  # Covariable Selection ----------------------------------------------------
+  # Covariable Selection ----
   # get parameters
   observe({
     values$r.squared.cutoff <- input$r.squared.cutoff.slider
@@ -1095,7 +1090,7 @@ server <- function(input, output, session) {
       
     }) # end progression indication
     
-    # Plot ----
+    # Selection Heatmap ----
     plot <- plot_multivar(data = all.multi)
     output$multi.plot <- renderPlot({
       validate(
@@ -1135,7 +1130,7 @@ server <- function(input, output, session) {
     #log success
     values$sucess.select <- 1
     
-    # Methods Description -----------------------------------------------------
+    # Methods Description 
     # placeholder
     selection.description <- NULL
     
@@ -1153,7 +1148,7 @@ server <- function(input, output, session) {
     output$res.annot.c <- renderDataTable(isolate(values$annot.c), options = list(pageLength = 10))
   })
   
-  # Results -----------------------------------------------------------------
+  # Results Download ----
   # prepare data for download
   output$download.full.model.r.squared <- downloadHandler(
     filename = "Covariate_Selection.csv",
