@@ -3,7 +3,7 @@ server <- function(input, output, session) {
   
   # Setup ----
   # load dependencies
-  source(file = "functions/app_dependencies.R")
+  # source(file = "functions/app_dependencies.R")
   
   # for storage
   values <- reactiveValues()

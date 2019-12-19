@@ -13,7 +13,6 @@ getOption("repos")
 
 # seperate calls to all packages? -> package dependency is otherwise not recognized by shinyapps.io
 library("BiocManager")
-library("shinythemes")
 library("data.table")
 library("corrplot")
 library("sva")

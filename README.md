@@ -45,7 +45,6 @@ The app requires an up-to-date R installation as well as the following
 packages:
 
 * shiny  (install via CRAN - `install.packages("shiny")`)
-* shinythemes  (install via CRAN - `install.packages("shinythemes")`)
 * BiocManager  (install via CRAN - `install.packages("BiocManager")`)
 * sva (install via
   [Bioconductor](https://bioconductor.org/packages/release/bioc/html/sva.html))
@@ -78,6 +77,5 @@ packages:
   https://www.R-project.org/.
 * Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2019). shiny: Web Application Framework for R. R package version 1.3.0.
   https://CRAN.R-project.org/package=shiny
-* Winston Chang (2018). shinythemes: Themes for Shiny. R package version 1.1.2. https://CRAN.R-project.org/package=shinythemes
 * Achim Zeileis, Torsten Hothorn (2002). Diagnostic Checking in Regression Relationships. R News 2(3), 7-10. URL
   https://CRAN.R-project.org/doc/Rnews/

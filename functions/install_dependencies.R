@@ -2,7 +2,6 @@ install_dependencies <- function(){
   # which packages do I need for this app
   necessary.packages <- c(
     "BiocManager",
-    "shinythemes",
     "data.table",
     "corrplot",
     "sva",

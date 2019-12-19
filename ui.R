@@ -1,10 +1,9 @@
 # Define UI for application that draws a histogram
-library("visNetwork")
+source(file = "functions/app_dependencies.R")
 
 ui <-  navbarPage(
   title = "Analysis Steps",
   position = "static-top",
-  theme = shinythemes::shinytheme("united"),
   
   #=== Panels ===#
   
