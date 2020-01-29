@@ -125,9 +125,21 @@ server <- function(input, output, session) {
     values$input.metab <- fread(input$input.metab$datapath, sep=input$sep.metab)
     
     # Update select input immediately after clicking on the action button.
-    updateSelectInput(session, "metab.id","Select Metabolite ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[3])
-    updateSelectInput(session, "cohort.col","Select Metabolite Cohort ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[1])
-    updateSelectInput(session, "batch.col","Select Metabolite Batch ID Column", choices = names(values$input.metab), selected = names(values$input.metab)[2])
+    updateSelectInput(session,
+                      "metab.id",
+                      "Select Metabolite ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[3])
+    updateSelectInput(session, 
+                      "cohort.col",
+                      "Select Metabolite Cohort ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[1])
+    updateSelectInput(session, 
+                      "batch.col",
+                      "Select Metabolite Batch ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[2])
     
     # output message
     output$metab.upload.success <- renderText("Metabolite data uploaded successfully. Please make sure it is the right data.")
@@ -518,7 +530,7 @@ server <- function(input, output, session) {
                       sig.level=0.05, 
                       pch.col = rgb(0,0,0,0.66), 
                       col = colorRampPalette(c("blue", "grey95", "red"))(20),
-                      title = "Maximimum (signed) R2 across all cohorts",
+                      title = "Maximum (signed) R2 across all cohorts",
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )
@@ -881,7 +893,7 @@ server <- function(input, output, session) {
                       sig.level=0.05, 
                       pch.col = rgb(0,0,0,0.66), 
                       col = colorRampPalette(c("blue", "grey95", "red"))(20),
-                      title = "Maximimum (signed) R2 across all cohorts",
+                      title = "Maximum (signed) R2 across all cohorts",
                       mar=c(0, 0, 4, 0),
                       cl.length = 11
       )

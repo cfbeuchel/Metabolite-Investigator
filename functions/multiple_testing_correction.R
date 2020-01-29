@@ -13,7 +13,7 @@ multiple_testing_correction <- function(
                    res.remaining)
   all.multi <- rbindlist(
     to.merge,
-    use.names = T)
+    use.names = T, fill = TRUE)
   
   # remove NA elements from merging (in case no covariate was selected)
   all.multi <- all.multi[!is.na(cohort),]
