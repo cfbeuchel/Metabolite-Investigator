@@ -407,7 +407,7 @@ You can check the pairwise Pearsons' correlation of each covariate pair in each 
                                    Use this to select factors that you know are important and you want to include in a confounder model regardless
                                    of the variance it explains."),
                      selectInput(inputId = "mandatory.inclusion.selecter",
-                                 label = "Mandatory Inclusions",
+                                 label = "Forced Inclusions",
                                  choices = NULL, multiple = T, selected = NULL)),
                    # sidebarPanel(width = 3,
                    conditionalPanel(
