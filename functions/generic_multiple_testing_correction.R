@@ -46,18 +46,21 @@ generic_multiple_testing_correction <- function(
     
     # Benjamini Bogomolov -> standard BH-BH and BB second level adjustment
     p.col <- "p.benjamini.bogomolov"
-    hier <- data[
-      , p.benjamini.bogomolov := 
-        addHierarchFDR(
-          pvalues = p.value,
-          categs = as.character(term)
-        ), by = .(cohort)]
+    hier <- data[, addHierarchFDR(
+      pvalues = p.value,
+      categs = as.character(term),
+      fdrmethod_level1 = "BH",
+      fdrmethod_level2 = "BH",
+      correctionLevel1 = "BB"
+    ),
+    by = .(cohort)]
     
     data$p.benjamini.bogomolov.level1 <- hier$fdr_level1
     data$p.benjamini.bogomolov.level2 <- hier$fdr_level2
     data$p.benjamini.bogomolov.sig <- hier$hierarch_fdr5proz
     data$tmp.sig <- data$p.benjamini.bogomolov.sig
     data$tmp.p.adj <- data$p.benjamini.bogomolov.level1
+    
     
   } else {
     stop("Non-avaliable multiple-testing correction method supplied. Please choose one of the four available methods.")
