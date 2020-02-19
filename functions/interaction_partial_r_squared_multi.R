@@ -1,7 +1,7 @@
 interaction_partial_r_squared_multi <- function(responses,
-                              predictors,
-                              dat,
-                              verbose = T) {
+                                                predictors,
+                                                dat,
+                                                verbose = T) {
   
   
   all.covars <- predictors
@@ -19,77 +19,102 @@ interaction_partial_r_squared_multi <- function(responses,
     my.metab <- testplan[index == (i), resp]
     my.covar <- testplan[index == (i), pred]
     
-    # start by building the full and minus one model
-    my.full.formula <- as.formula(
-      paste0(
-        my.metab, " ~ ", paste(paste0(all.covars, "*cohort"), collapse = " + "))
-      )
     
-    my.reduced.formula <- as.formula(
-      paste0(
-        my.metab, " ~ ", paste(
+    res.single <- tryCatch(
+      {
+        
+        # start by building the full and minus one model
+        my.full.formula <- as.formula(
           paste0(
-            all.covars[all.covars!=my.covar],
-            "*cohort"),
-          collapse = " + "),
-        " + ",
-        my.covar
+            my.metab, " ~ ", paste(paste0(all.covars, "*cohort"), collapse = " + "))
         )
-      )
+        
+        my.reduced.formula <- as.formula(
+          paste0(
+            my.metab, " ~ ", paste(
+              paste0(
+                all.covars[all.covars!=my.covar],
+                "*cohort"),
+              collapse = " + "),
+            " + ",
+            my.covar
+          )
+        )
+        
+        # fit the two models
+        my.fm <- lm(formula = my.full.formula, data = dat)
+        my.rm <- lm(formula = my.reduced.formula, data = dat)
+        my.full.model <- summary(my.fm)
+        my.reduced.model <- summary(my.rm)
+        
+        # logLik ratio test with p-val
+        my.lrtest <- lmtest::lrtest(my.rm, my.fm)
+        lrtest.p <- my.lrtest$`Pr(>Chisq)`
+        lrtest.p <- lrtest.p[!is.na(lrtest.p)]
+        
+        
+        # extract the explained variance 
+        my.full.r.squared <- my.full.model$r.squared
+        my.full.r.squared.adj <- my.full.model$adj.r.squared
+        my.full.r.squared.adj[my.full.r.squared.adj < 0] <- 0
+        my.reduced.r.squared <- my.reduced.model$adj.r.squared
+        
+        # clean output
+        res <- as.data.frame(coefficients(my.full.model))
+        setDT(res, keep.rownames = T)
+        setnames(res, old = names(res), new = c("term",
+                                                "estimate",
+                                                "std.error",
+                                                "statistic",
+                                                "interaction.p.value"))
+        res[, lr.test.p := lrtest.p]
+        
+        # in case of categorical (with character coding), select the most significant one
+        res.single <- res[term %in% grep(pattern = (paste0(my.covar, ".*cohort|cohort.*", my.covar)), x = res$term, value = T), ]
+        
+        if(nrow(res.single)!=1){
+          res.single <- res[term %in% grep(pattern = paste0(my.covar, ".*cohort|cohort.*", my.covar),
+                                           x = res$term,
+                                           value = T), ]
+          if(nrow(res)!=0){
+            res.single <- res.single[interaction.p.value == min(interaction.p.value),]
+          }
+        }
+        
+        # substract r-squares to get explained variance of my.covar
+        my.r.squared <- my.full.r.squared.adj - my.reduced.r.squared
+        my.r.squared[my.r.squared<0] <- 0
+        
+        # consolidate output
+        res.single[, `:=`(metab = my.metab,
+                          term = my.covar,
+                          interaction.r.squared = my.r.squared,
+                          model.r.squared = my.full.r.squared.adj,
+                          n = length(my.full.model$residuals),
+                          comment = NA)]
+        
+        # return value
+        return(res.single)
 
-    # fit the two models
-    my.fm <- lm(formula = my.full.formula, data = dat)
-    my.rm <- lm(formula = my.reduced.formula, data = dat)
-    my.full.model <- summary(my.fm)
-    my.reduced.model <- summary(my.rm)
-    
-    # logLik ratio test with p-val
-    my.lrtest <- lmtest::lrtest(my.rm, my.fm)
-    lrtest.p <- my.lrtest$`Pr(>Chisq)`
-    lrtest.p <- lrtest.p[!is.na(lrtest.p)]
-    
-    
-    # extract the explained variance 
-    my.full.r.squared <- my.full.model$r.squared
-    my.full.r.squared.adj <- my.full.model$adj.r.squared
-    my.full.r.squared.adj[my.full.r.squared.adj < 0] <- 0
-    my.reduced.r.squared <- my.reduced.model$adj.r.squared
-    
-    # clean output
-    res <- as.data.frame(coefficients(my.full.model))
-    setDT(res, keep.rownames = T)
-    setnames(res, old = names(res), new = c("term",
-                                            "estimate",
-                                            "std.error",
-                                            "statistic",
-                                            "interaction.p.value"))
-    res[, lr.test.p := lrtest.p]
-    
-    # in case of categorical (with character coding), select the most significant one
-    res.single <- res[term %in% grep(pattern = (paste0(my.covar, ".*cohort|cohort.*", my.covar)), x = res$term, value = T), ]
-    
-    if(nrow(res.single)!=1){
-      res.single <- res[term %in% grep(pattern = paste0(my.covar, ".*cohort|cohort.*", my.covar),
-                                       x = res$term,
-                                       value = T), ]
-      if(nrow(res)!=0){
-        res.single <- res.single[interaction.p.value == min(interaction.p.value),]
-      }
-    }
-    
-    # substract r-squares to get explained variance of my.covar
-    my.r.squared <- my.full.r.squared.adj - my.reduced.r.squared
-    my.r.squared[my.r.squared<0] <- 0
-    
-    # consolidate output
-    res.single[, `:=`(metab = my.metab,
-                      term = my.covar,
-                      interaction.r.squared = my.r.squared,
-                      model.r.squared = my.full.r.squared.adj,
-                      n = length(my.full.model$residuals))]
-    
-    # return value
-    return(res.single)
+      },error=function(cond){
+        
+        res.single <- data.table(
+          metab = my.metab, 
+          term = my.covar,
+          estimate = NA, 
+          std.error = NA, 
+          statistic = NA, 
+          interaction.r.squared = NA,
+          model.r.squared = NA,
+          interaction.p.value = NA,
+          lr.test.p = NA, 
+          n = NA,
+          comment = gsub(x = as.character(cond),
+                         pattern = "\n",
+                         replacement = " ")
+        )
+        return(res.single)
+      })
     
   })
   
@@ -98,8 +123,8 @@ interaction_partial_r_squared_multi <- function(responses,
   # column order for easier readability
   setcolorder(x = my.output, 
               neworder = c("metab", "term", "estimate", "std.error", "statistic", 
-                           "interaction.r.squared", "model.r.squared", "interaction.p.value", "lr.test.p", "n")
-              )
+                           "interaction.r.squared", "model.r.squared", "interaction.p.value", "lr.test.p", "n", "comment")
+  )
   
   # return cohort output
   return(my.output)

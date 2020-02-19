@@ -36,12 +36,29 @@ library("shiny")
 runGitHub("Metabolite-Investigator", "cfbeuchel")
 ```
 
+For local offline use the the application needs to be downloaded, the ZIP-file extracted an run like this:
+
+```r
+# to install shiny run:
+# install.packages("shiny")
+# load the Shiny package
+library("shiny")
+
+# start the App from the previously downloaded folder, e.g.
+runApp("C:\Users\cfbeuchel\Downloads\Metabolite-Investigator-master")
+
+# or on unix based systems for example:
+runApp("/home/cfbeuchel/Downloads/Metabolite-Investigator-master")
+```
+
+Replace the directory within the brackets with location of the folder on your system. Make sure the path points to the folder containing the `app.R`, `server.R` and `ui.R` scripts.
+
 The App comes with example data from two cohorts that may be used to try out
 the functionality. Press the `Use Example Data` button to load the data and try out the application. 
 
 ## Requirements
 
-The app requires an up-to-date R installation as well as the following
+The app requires an [up-to-date R installation](https://www.r-project.org/) as well as the following
 packages:
 
 * shiny  (install via CRAN - `install.packages("shiny")`)

@@ -4,7 +4,9 @@ generic_multiple_testing_correction <- function(
 ){
   # re-assign input
   multiple.testing.correction <- correctionMethod
-
+  
+  # remove NA p-value columns 
+  data <- data[!is.na(p.value)]
   
   if(multiple.testing.correction == "fdr"){
     

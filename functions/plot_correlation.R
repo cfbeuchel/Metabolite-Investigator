@@ -28,17 +28,23 @@ plot_correlation <- function(data, cohort, covariates){
     return(cormat)
   }
   
-  reorder_cormat <- function(cormat){
-    # Use correlation between variables as distance
-    dd <- as.dist((1-cormat)/2)
-    hc <- hclust(dd)
-    cormat <-cormat[hc$order, hc$order]
-  }
+  # reorder_cormat <- function(cormat){
+  #   # Use correlation between variables as distance
+  #   dd <- as.dist((1-cormat)/2)
+  #   hc <- hclust(dd)
+  #   cormat <-cormat[hc$order, hc$order]
+  # }
   
   # arrange data
-  M.reorder <- reorder_cormat(M)
-  M.upper <- get_upper_tri(M)
-  M.upper.m <- melt(M.upper, na.rm = T)
+  # M.reorder <- tryCatch(reorder_cormat(M),error=function(cond){return(M)})
+  # M.upper <- get_upper_tri(M)
+  # M.upper.m <- melt(M.upper, na.rm = T)
+  
+  M.upper <- as.data.frame(get_upper_tri(M))
+  setDT(M.upper,keep.rownames = TRUE)
+  M.upper.m <- melt(M.upper, na.rm = T,measure.vars = names(M.upper)[-1],variable.factor = TRUE,)
+  M.upper.m$rn <- factor(M.upper.m$rn, levels = levels(M.upper.m$variable))
+  setnames(M.upper.m,old=c("rn","variable"),new=c("Var1","Var2"))
   
   ggheatmap <- ggplot(M.upper.m, aes(Var2, Var1, fill = value))+
     geom_tile(color = "white")+
@@ -54,7 +60,7 @@ plot_correlation <- function(data, cohort, covariates){
     coord_fixed()
   
   plot.results <- ggheatmap +
-    geom_text(aes(Var2, Var1, label = round(value, 3)), color = "black", size = 4) +
+    geom_text(aes(Var2, Var1, label = round(value, 2)), color = "black", size = 3) +
     theme(
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
