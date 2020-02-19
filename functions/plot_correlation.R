@@ -60,7 +60,7 @@ plot_correlation <- function(data, cohort, covariates){
     coord_fixed()
   
   plot.results <- ggheatmap +
-    geom_text(aes(Var2, Var1, label = round(value, 2)), color = "black", size = 3) +
+    geom_text(aes(Var2, Var1, label = round(value, 2)), color = "black", size = 4) +
     theme(
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),

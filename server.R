@@ -29,7 +29,7 @@ server <- function(input, output, session) {
   
   
   # show example data
-  output$preview.example <- renderDataTable({
+  output$preview.example <- DT::renderDataTable({
     data.table(id = paste0("Sample_", 1:12),
                cohort = paste0("cohort_", rep(c("a", "b"), each = 6)),
                batch = paste0("batch_", rep(1:3, each = 2)),
@@ -50,11 +50,11 @@ server <- function(input, output, session) {
     
     # metab 
     values$input.metab <- (fread("data/190307_simu_metabs.csv"))
-    output$preview.metab <- renderDataTable({values$input.metab}, options = list(pageLength = 10))
+    output$preview.metab <- DT::renderDataTable({values$input.metab}, options = list(pageLength = 10))
     
     # covar
     values$input.covar <- (fread("data/191209_simu_factors.csv"))
-    output$preview.covar <- renderDataTable({values$input.covar}, options = list(pageLength = 10))
+    output$preview.covar <- DT::renderDataTable({values$input.covar}, options = list(pageLength = 10))
     
     # Mergin buttons
     # Update select input immediately after clicking on the action button.
@@ -87,7 +87,7 @@ server <- function(input, output, session) {
   
   # Data Preview ----
   # preview covar data
-  output$preview.covar <- renderDataTable({
+  output$preview.covar <- DT::renderDataTable({
     req(input$input.covar)
     tryCatch(
       {
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
   }, options = list(pageLength = 10))
   
   # Preview metabolite Data
-  output$preview.metab <- renderDataTable({
+  output$preview.metab <- DT::renderDataTable({
     req(input$input.metab)
     tryCatch(
       {
@@ -224,7 +224,7 @@ server <- function(input, output, session) {
     }
     
     # valid selection of columns
-    output$data.merge <- renderDataTable({
+    output$data.merge <- DT::renderDataTable({
       validate(
         need(any(duplicated(c(values$metab.id,
                               values$cohort.col,
@@ -252,7 +252,7 @@ server <- function(input, output, session) {
     
     # preview
     merged.preview <- values$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
-    output$data.merge <- renderDataTable({merged.preview}, options = list(pageLength = 10))
+    output$data.merge <- DT::renderDataTable({merged.preview}, options = list(pageLength = 10))
     
     # save an indicator that the previous step was sucessful
     values$success.merge <- 1
@@ -376,16 +376,16 @@ server <- function(input, output, session) {
     # Result Preview ----
     # if(input$button.preview.prepro==T){
     # show annotation table
-    output$prepro.annot.m <- renderDataTable({
+    output$prepro.annot.m <- DT::renderDataTable({
       annot.m
     }, options = list(pageLength = 10))
     # show annotation table
-    output$prepro.annot.c <- renderDataTable({
+    output$prepro.annot.c <- DT::renderDataTable({
       annot.c
     }, options = list(pageLength = 10))
     
     # preview data
-    output$prepro.data <- renderDataTable({
+    output$prepro.data <- DT::renderDataTable({
       dat
     }, options = list(pageLength = 10))
     # }
@@ -512,7 +512,12 @@ server <- function(input, output, session) {
     output$plot.univar <- renderPlot({
       plot_univar(data = copy(res.univar), 
                   rSquaredCol = "r.squared")
-    },width = 75*length(c.cols), height = 75 * length(c.cols))
+    },
+    # width = 40*length(c.cols), 
+    # height = 50 * length(c.cols)
+    width  = ifelse(25*length(c.cols)<400,600,20*length(c.cols)), 
+    height = ifelse(25*length(c.cols)<400,600,40*length(c.cols))
+    )
     
     # reformat results for heatmap
     uni.max.matrix <- make_matrices(dat = res.univar,
@@ -601,13 +606,13 @@ server <- function(input, output, session) {
     # End: interaction Heatmap ----
     
     # save results for output
-    output$res.univar <- renderDataTable(res.uni.out, options = list(pageLength = 10))
+    output$res.univar <- DT::renderDataTable(res.uni.out, options = list(pageLength = 10))
     values$res.univar <- res.uni.out
     values$annot.c <- annot.c
     values$success.uni <- 1
     
     # save interaction results for output
-    output$res.int.univar <- renderDataTable(res.uni.int.out, options = list(pageLength = 10))
+    output$res.int.univar <- DT::renderDataTable(res.uni.int.out, options = list(pageLength = 10))
     values$res.int.univar <- res.uni.int.out
     
     # placeholder
@@ -703,7 +708,7 @@ server <- function(input, output, session) {
     }
     
     # plot annotation
-    output$preview.corr.annot.c <- renderDataTable(annot.c, options = list(pageLength = 10))
+    output$preview.corr.annot.c <- DT::renderDataTable(annot.c, options = list(pageLength = 10))
     
     # update selector for later step
     updateSelectInput(session, inputId = "mandatory.inclusion.selecter", choices = c(NULL, c.cols), selected = NULL)
@@ -725,11 +730,15 @@ server <- function(input, output, session) {
     dat <- isolate(values$dat)
     c.cols <- isolate(values$c.cols)
     
-    output$correlation.plot <- renderPlot(
+    output$correlation.plot <- renderPlot({
       plot_correlation(
         data = dat,
         covariates = c.cols,
         cohort = cohort)
+      
+    },
+    width  = ifelse(25*length(c.cols)<400,600,40*length(c.cols)), 
+    height = ifelse(25*length(c.cols)<400,600,40*length(c.cols))
     )
   })
   
@@ -750,7 +759,7 @@ server <- function(input, output, session) {
     
     # annotation table entry "correlation.exclusion"
     annot.c[, correlation.exclusion := ifelse(covariate %in% c.cols, F, T)]
-    output$preview.corr.annot.c <- renderDataTable(annot.c, options = list(pageLength = 10))
+    output$preview.corr.annot.c <- DT::renderDataTable(annot.c, options = list(pageLength = 10))
     
     # output
     values$annot.m <- annot.m
@@ -769,7 +778,7 @@ server <- function(input, output, session) {
     
     # reset correlation annotation
     annot.c[, correlation.exclusion := F]
-    output$preview.corr.annot.c <- renderDataTable(annot.c, options = list(pageLength = 10))
+    output$preview.corr.annot.c <- DT::renderDataTable(annot.c, options = list(pageLength = 10))
     
     # write values
     values$c.cols <- c.cols.original
@@ -875,7 +884,12 @@ server <- function(input, output, session) {
     # plot the multivariable results
     output$plot.multivar <- renderPlot({
       plot_univar(data = copy(res.multivar), rSquaredCol = "term.r.squared")
-    },width = 75*length(c.cols), height = 75 * length(c.cols))
+    },
+    # width = 75*length(c.cols),
+    # height = 75 * length(c.cols)
+    width  = ifelse(25*length(c.cols)<400,600,20*length(c.cols)), 
+    height = ifelse(25*length(c.cols)<400,600,40*length(c.cols))
+    )
     
     # reformat results for heatmap
     multi.max.matrix <- make_matrices(dat = res.multivar,
@@ -963,8 +977,8 @@ server <- function(input, output, session) {
     res.multi.out$tmp.p.adj <- NULL
     
     # save results for output
-    output$res.multivar <- renderDataTable(res.multi.out, options = list(pageLength = 10))
-    output$res.int.multivar <- renderDataTable(res.multi.int.out, options = list(pageLength = 10))
+    output$res.multivar <- DT::renderDataTable(res.multi.out, options = list(pageLength = 10))
+    output$res.int.multivar <- DT::renderDataTable(res.multi.int.out, options = list(pageLength = 10))
     values$res.multivar <- res.multi.out
     values$res.int.multivar <- res.multi.int.out
     values$annot.c <- annot.c
@@ -1112,7 +1126,12 @@ server <- function(input, output, session) {
         )
       )
       plot
-    },width = 75*length(c.cols), height = 75 * length(c.cols))
+    },
+    # width = 75*length(c.cols), 
+    # height = 75 * length(c.cols)
+    width  = ifelse(25*length(c.cols)<400,600,15*length(c.cols)), 
+    height = ifelse(25*length(c.cols)<400,600,35*length(c.cols))
+    )
     
     # output
     values$all.multi <- all.multi
@@ -1154,10 +1173,10 @@ server <- function(input, output, session) {
     # })
     
     # Output
-    output$res.all.multi <- renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
-    output$res.full.model <- renderDataTable(isolate(values$full.model.r.squared), options = list(pageLength = 10))
-    output$res.annot.m <- renderDataTable(isolate(values$annot.m), options = list(pageLength = 10))
-    output$res.annot.c <- renderDataTable(isolate(values$annot.c), options = list(pageLength = 10))
+    output$res.all.multi <- DT::renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
+    output$res.full.model <- DT::renderDataTable(isolate(values$full.model.r.squared), options = list(pageLength = 10))
+    output$res.annot.m <- DT::renderDataTable(isolate(values$annot.m), options = list(pageLength = 10))
+    output$res.annot.c <- DT::renderDataTable(isolate(values$annot.c), options = list(pageLength = 10))
   })
   
   # Results Download ----

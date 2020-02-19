@@ -26,6 +26,21 @@ partial_r_squared_excluded_covars <- function(cohort,
     # inner loop over all predictors
     r.squared.one.metab <- lapply(all.covars[all.covars == getPValue], function(my.covar){
       
+      # start by checking for singular predictors
+      my.test.formula <- as.formula(
+        paste0(
+          my.metab, " ~ ",
+          paste(all.covars,
+                collapse = " + ")))
+      mm <- model.matrix(my.test.formula, data[cohort == my.cohort, ])
+      sing.pred <- apply(mm,2,uniqueN)
+      sing.pred <- sing.pred[names(sing.pred) != "(Intercept)"]
+      
+      # remove single integer in case of contrast
+      names(sing.pred) <- gsub("\\d{1}$", replacement = "", names(sing.pred))
+      remove.sing <- names(sing.pred[sing.pred<=1])
+      all.covars <- all.covars[!(all.covars %in% remove.sing)]
+      
       # my.metab <- all.metabs[1] # debug 
       # my.covar <- all.covars[1] # debug 
 
@@ -65,7 +80,15 @@ partial_r_squared_excluded_covars <- function(cohort,
                         p.val = my.p.value,
                         term.r.squared = my.r.squared,
                         model.r.squared = my.full.adj.r.squared,
-                        n = my.n)
+                        n = my.n,
+                        comment = NA)
+      
+      if(length(remove.sing)!=0){
+        res[,comment := paste0(
+          "Singular predictor(s) ", 
+          paste(remove.sing, collapse = ", "), 
+          " removed from model! Consider removing factors with high missingness prior to analysis!")]
+      }
       
       # return value
       return(res)

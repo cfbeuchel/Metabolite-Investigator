@@ -89,6 +89,7 @@ relevance_backwards_selection <- function(rSquaredCutoff,
                           model.r.squared = NA,
                           p.value = NA,
                           n = NA,
+                          comment = NA,
                           r.squared.cutoff = rSquaredCutoff)
       }
     })

@@ -19,6 +19,21 @@ partial_r_squared <- function(cohort,
 
   # middle loop over all responses, LHS etc
   r.squared.all.metabs <- lapply(all.metabs, function(my.metab) {
+
+    # start by checking for singular predictors
+    my.test.formula <- as.formula(
+      paste0(
+        my.metab, " ~ ",
+        paste(all.covars,
+              collapse = " + ")))
+    mm <- model.matrix(my.test.formula, data[cohort == my.cohort, ])
+    sing.pred <- apply(mm,2,uniqueN)
+    sing.pred <- sing.pred[names(sing.pred) != "(Intercept)"]
+    
+    # remove single integer in case of contrast
+    names(sing.pred) <- gsub("\\d{1}$", replacement = "", names(sing.pred))
+    remove.sing <- names(sing.pred[sing.pred<=1])
+    all.covars <- all.covars[!(all.covars %in% remove.sing)]
     
     # inner loop over all predictors
     r.squared.one.metab <- lapply(all.covars, function(my.covar){
@@ -76,7 +91,16 @@ partial_r_squared <- function(cohort,
                  term = my.covar,
                  term.r.squared = my.r.squared,
                  model.r.squared = my.full.r.squared.adj,
-                 n = length(my.full.model$residuals))]
+                 n = length(my.full.model$residuals),
+                 comment = NA)]
+      
+      # add error in case of removed singular
+      if(length(remove.sing)!=0){
+        res.single[,comment := paste0(
+          "Singular predictor(s) ", 
+          paste(remove.sing, collapse = ", "), 
+          " removed from model! Consider removing factors with high missingness prior to analysis!")]
+      }
       
       # return value
       return(res.single)
@@ -98,7 +122,7 @@ partial_r_squared <- function(cohort,
   # column order for easier readability
   setcolorder(x = my.output, 
               neworder = c("cohort", "metab", "term", "estimate", "std.error", "statistic", 
-                           "term.r.squared", "model.r.squared", "p.value", "n"))
+                           "term.r.squared", "model.r.squared", "p.value", "n", "comment"))
   
   # add a metabolite column
   my.output[ , `:=`(r.squared.cutoff = rSquaredCutoff)]
