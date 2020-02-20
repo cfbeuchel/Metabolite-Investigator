@@ -10,6 +10,7 @@ install_dependencies <- function(){
     "magrittr",
     "visNetwork",
     "lmtest",
+    "DT",
     "scales")
   
   # check for installed packages and install them if necessary

@@ -62,6 +62,7 @@ The app requires an [up-to-date R installation](https://www.r-project.org/) as w
 packages:
 
 * shiny  (install via CRAN - `install.packages("shiny")`)
+* DT  (install via CRAN - `install.packages("DT")`)
 * BiocManager  (install via CRAN - `install.packages("BiocManager")`)
 * sva (install via
   [Bioconductor](https://bioconductor.org/packages/release/bioc/html/sva.html))
@@ -78,6 +79,8 @@ packages:
 
 * Martin Morgan (2018). BiocManager: Access the Bioconductor Project Package Repository. R package version 1.30.4.
   https://CRAN.R-project.org/package=BiocManager
+* Yihui Xie, Joe Cheng and Xianying Tan (2019). DT: A Wrapper of the JavaScript Library 'DataTables'. R package version 0.11.
+  https://CRAN.R-project.org/package=DT
 * Jeffrey T. Leek, W. Evan Johnson, Hilary S. Parker, Elana J. Fertig, Andrew E. Jaffe, John D. Storey, Yuqing Zhang and Leonardo Collado Torres
   (2019). sva: Surrogate Variable Analysis. R package version 3.30.1.
 * Matt Dowle and Arun Srinivasan (2019). data.table: Extension of `data.frame`. R package version 1.12.2.

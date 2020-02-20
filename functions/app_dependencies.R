@@ -22,6 +22,7 @@ library("magrittr")
 library("visNetwork")
 library("scales")
 library("lmtest")
+library("DT")
 
 # shiny Options - enable larger Upload sizes
 options(shiny.maxRequestSize=30*1024^2) 
