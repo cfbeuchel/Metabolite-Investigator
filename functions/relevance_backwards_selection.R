@@ -29,7 +29,8 @@ relevance_backwards_selection <- function(rSquaredCutoff,
   }
   
   # start with all covars - matching with reshaped.data in the function call chooses the right covariates for each cohort
-  all.terms <- allPredictors[!(allPredictors %in% hm)]
+  # all.terms <- allPredictors[!(allPredictors %in% hm)]
+  all.terms <- allPredictors[!(allPredictors %in% hm[!(hm %in% forceInclude)])]
   
   # create a seperate list for each cohort (selection is done within each cohort)
   # create list with vector for each cohort and all terms

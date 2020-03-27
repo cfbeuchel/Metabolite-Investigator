@@ -59,9 +59,9 @@ partial_r_squared <- function(cohort,
       
       # extract the explained variance 
       my.full.r.squared <- my.full.model$r.squared
-      my.full.r.squared <- my.full.r.squared[my.full.r.squared<0] <- 0
+      my.full.r.squared[my.full.r.squared<0] <- 0
       my.full.r.squared.adj <- my.full.model$adj.r.squared
-      my.full.r.squared.adj <- my.full.r.squared.adj[my.full.r.squared.adj<0] <- 0
+      my.full.r.squared.adj[my.full.r.squared.adj<0] <- 0
       my.reduced.r.squared <- my.reduced.model$r.squared
       
       # clean output
