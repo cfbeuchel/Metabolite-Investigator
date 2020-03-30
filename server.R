@@ -61,24 +61,24 @@ server <- function(input, output, session) {
     updateSelectInput(
       session,
       "metab.id",
-      "Select Metabolite ID Column",
+      # "Select Metabolite ID Column",
       choices = names(values$input.metab),
       selected = names(values$input.metab)[3])
     updateSelectInput(
       session, 
       "cohort.col",
-      "Select Metabolite Cohort ID Column",
+      # "Select Metabolite Cohort ID Column",
       choices = names(values$input.metab), 
       selected = names(values$input.metab)[1])
     updateSelectInput(
       session, 
       "batch.col",
-      "Select Metabolite Batch ID Column",
+      # "Select Metabolite Batch ID Column",
       choices = names(values$input.metab), 
       selected = names(values$input.metab)[2])
     updateSelectInput(session,
                       "covar.id",
-                      "Select Covariate ID Column", 
+                      # "Select Covariate ID Column", 
                       choices = names(values$input.covar))
     
     # output some text when using example data
@@ -127,17 +127,17 @@ server <- function(input, output, session) {
     # Update select input immediately after clicking on the action button.
     updateSelectInput(session,
                       "metab.id",
-                      "Select Metabolite ID Column", 
+                      # "Select Metabolite ID Column", 
                       choices = names(values$input.metab), 
                       selected = names(values$input.metab)[3])
     updateSelectInput(session, 
                       "cohort.col",
-                      "Select Metabolite Cohort ID Column", 
+                      # "Select Metabolite Cohort ID Column", 
                       choices = names(values$input.metab), 
                       selected = names(values$input.metab)[1])
     updateSelectInput(session, 
                       "batch.col",
-                      "Select Metabolite Batch ID Column", 
+                      # "Select Metabolite Batch ID Column", 
                       choices = names(values$input.metab), 
                       selected = names(values$input.metab)[2])
     
@@ -153,10 +153,13 @@ server <- function(input, output, session) {
     values$input.covar <- (fread(input$input.covar$datapath, sep=input$sep.covar))
     
     # update button
-    updateSelectInput(session, "covar.id","Select Covariate ID Column", choices = names(values$input.covar))
+    updateSelectInput(session, 
+                      "covar.id",
+                      # "Select Covariate ID Column", 
+                      choices = names(values$input.covar))
     
     # output message
-    output$covar.upload.success <- renderText("Covariate data uploaded successfully. Please make sure it is the right data.")
+    output$covar.upload.success <- renderText("Factor data uploaded successfully. Please make sure it is the right data.")
   })
   
   # Covariate/Metabolite column selection ----
@@ -164,7 +167,7 @@ server <- function(input, output, session) {
     if(input$rest.covar==F){
       updateSelectInput(session,
                         "covar.col",
-                        "Select All Covariate Columns",
+                        "Select All Factor Columns",
                         choices = names(values$input.covar)) # no choices before uploading
     }
   })
@@ -690,12 +693,12 @@ server <- function(input, output, session) {
     # display message
     if(length(high.corr) != 0){
       corr.message <- paste0(
-        "The covariates ",
+        "The factors ",
         paste(high.corr, collapse = ", "), " correlate with r>", slider.input,
         ". Please select those you wish to exclude from the analysis.")
     } else {
       corr.message <- paste0(
-        "None of the covariates correlate with r>", slider.input,
+        "None of the factors correlate with r>", slider.input,
         ". No problem found. ")
     }
     output$high.corr <- renderText({corr.message})
@@ -1122,7 +1125,7 @@ server <- function(input, output, session) {
       validate(
         need(
           !is.na(any(all.multi$term.r.squared)),
-          "Explained variances could not be calculated. Please reconsider your filters. Maybe you removed all covariates due to high missings?"
+          "Explained variances could not be calculated. Please reconsider your filters. Maybe you removed all factors due to high missings?"
         )
       )
       plot
@@ -1149,7 +1152,7 @@ server <- function(input, output, session) {
           is.na(
             full.model.r.squared$covariate
           )
-        ), paste0("None of the covariates were relevant at the chosen cutoff of ",
+        ), paste0("None of the factors were relevant at the chosen cutoff of ",
                   expression("r"^2),
                   "> ",
                   isolate(values$r.squared.cutoff),
@@ -1182,13 +1185,13 @@ server <- function(input, output, session) {
   # Results Download ----
   # prepare data for download
   output$download.full.model.r.squared <- downloadHandler(
-    filename = "Covariate_Selection.csv",
+    filename = "factor_Selection.csv",
     content = function(file) {
       fwrite(isolate(values$full.model.r.squared), file)
     }
   )
   output$download.annot.c <- downloadHandler(
-    filename = "Covariate_Annotation.csv",
+    filename = "Factor_Annotation.csv",
     content = function(file) {
       fwrite(isolate(values$annot.c), file)
     }
