@@ -398,10 +398,10 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                                  sep = "."),
                      tags$hr(),
                      helpText("Select factors that should be included mandatorily.
-                                   Use this to select factors you know are important and you want to include in regardless
-                                   of its explained variance."),
+                                   Use this to select factors you want to include in the selection results regardless
+                                   of their explained variance."),
                      selectInput(inputId = "mandatory.inclusion.selecter",
-                                 label = "Forced Inclusions",
+                                 label = "Mandatory Inclusion of Factors:",
                                  choices = NULL, multiple = T, selected = NULL)),
                    # sidebarPanel(width = 3,
                    conditionalPanel(
