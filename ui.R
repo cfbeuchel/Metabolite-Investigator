@@ -11,8 +11,8 @@ ui <-  navbarPage(
   tabPanel("Description", {
     sidebarLayout(
       sidebarPanel(width = 3,
-                   helpText("This is a general description of the analysis steps taken in this application.
-                                The analysis steps are executed in the order they are presented in in the tabs above.
+                   helpText("This is a general description of the analysis steps.
+                                Please follow the order as presented above.
                                 Each step has the successful execution of the previous step as a prerequisite."),
                    tags$hr(),
                    helpText(strong("To ensure full functionality, please execute all steps in order."))
@@ -20,7 +20,7 @@ ui <-  navbarPage(
       mainPanel(width = 5,
                 h3("Metabolite Investigator"),
                 tags$hr(),
-                p("Analysis and integration of data from high-throughput targeted metabolomics data has become a common tool in epidemiological research. However, no standardised workflow for preprocessing and subsequent analysis for metabolomics data from multiple large studies has been established. This Shiny-App facilitates the pre-processing, association analysis and covariable selection for targeted metabolomics data from multiple study cohorts. We present a principled workflow tailored to the specific issues of metabolomics data, namely data skew, zero-inflation, (known) batch effects and the selection of a confounder model for the association with other '-omics' data sets. The descision for an analysis methodology was guided by a seperate simulation study to provide an approach with the least possible bias without compromising power."),
+                p("Analysis and integration of data from high-throughput targeted metabolomics data has become a common tool in epidemiological research. However, no standardised workflow for preprocessing and subsequent analysis for metabolomics data from multiple large studies has been established. This Shiny-App facilitates the pre-processing, association analysis and factor selection for targeted metabolomics data from multiple study cohorts. We present a principled workflow tailored to the specific issues of metabolomics data, namely data skew, zero-inflation, (known) batch effects and the selection of a confounder model for the association with other '-omics' data sets. The descision for an analysis methodology was guided by a seperate simulation study to provide an approach with the least possible bias without compromising power."),
                 tags$hr(),
                 p("Upload and merge metabolite and factor data in steps 1.1 and 1.2. A short description of the workflow of these steps can be found below."),
                 tags$hr(),
@@ -363,7 +363,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
       sidebarPanel(width = 3,
                    conditionalPanel(
                      condition = "input.ChangeBasedOnThis == 'Plot/<br/>Settings' || input.ChangeBasedOnThis == 'Description/<br/>Settings'",
-                     helpText("Press this button to start the covariable selection"),
+                     helpText("Press this button to start the factor selection"),
                      actionButton(inputId = "start.selection.button", label = "Factor Selection", icon = icon("play-circle")),
                      tags$hr(),
                      helpText("Specify the parameters of the factor selection. Necessary parameters can be very data specific."),
