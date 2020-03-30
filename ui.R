@@ -196,7 +196,7 @@ ui <-  navbarPage(
                                      tags$hr(),
                                      h4("Methods Description"),
                                      tags$hr(),
-                                     p("Choose whether you want to preprocess your metabolite data. Preprocessing steps include three steps."),
+                                     p("Choose whether you want to pre-process your metabolite data. Pre-processing include three optional steps."),
                                      p("1) An outlier filter of 5*SD on log-transformed data."),
                                      p("2) A rank-based inverse-normal transformation, matching the rank of each measurement to the quantiles of a standard normal distribution with a mean of 0 and a standard deviation of 1."),
                                      p("3) A batch-correction of known technical batches via a non-parametric empirical Bayes method implemented in sva::ComBat.  Missing values are mean imputed for the analysis and missingness will be restored afterwards. Batches with only a single value entry will be removed from further analysis. Batches with low variance cannot be removed by ComBat and will thus be removed via a linear model. Method of batch adjustment will be entered in the annotation file."),
@@ -267,24 +267,21 @@ ui <-  navbarPage(
   tabPanel("4. Correlation Check", {
     sidebarLayout(
       sidebarPanel(width = 3,
-                   helpText("You can remove highly correlating (Pairwise Pearsons Correlation Coefficient) factors from further analysis.
-                                Firstly, checks for which of the factors correlate highly are performed and presented in a correlation matrix for each cohort.
-                                Afterwards, please select cutoff, representing both positive and negative correlation
-                                (0 = absolutely no correlation allowed; 1 = perfect positive/negative correlation tolerated). Factors correlating above the selected thresold can be removed from the multivariable analysis via the drop-down menu."),
+                   helpText("It is recommended to remove correlated factors from multivariable regression analysis. To support this task, we present correlation results for each cohort. After selecting a threshold for correlation, respective pairs of factors are reported and one of the factors can be manually removed using the drop-down menu"),
                    actionButton(inputId = "corr.check.button", label = "Check Correlation", icon = icon("play-circle")),
                    tags$hr(),
                    sliderInput("corr.cut.slider",
-                               label = "Correlation cutoff",
+                               label = "Correlation threshold",
                                min = 0,
                                max = 0.99,
                                value = 0.75,
                                step = 0.01,
                                sep = "."),
                    tags$hr(),
-                   helpText("You can plot the pairwise correlation of the factors for each cohort here:"),
+                   helpText("Select a cohort to display the pairwise correlation of its factors:"),
                    selectInput(inputId = "plot.corr.select", label = "Display Correlation in Cohort", multiple = F, choices = NULL),
                    tags$hr(),
-                   helpText("This panel automatically displays only factors that correlate above the specified cutoff. This step can be omitted."),
+                   helpText("This panel displays factors correlated above the specified threshold to be optionally removed."),
                    selectInput(inputId = "exclude.corr.select", label = "Exclude Correlating Factors", multiple = T, choices = NULL),
                    actionButton(inputId = "corr.exclude.button", label = "Reset Factor Exclusion", icon = icon("redo"))
       ),
@@ -297,12 +294,9 @@ ui <-  navbarPage(
                                      tags$hr(),
                                      h4("Methods Description"),
                                      tags$hr(),
-                                     p("Highly correlated factors may cause multicolinearity-issues in the multivariable association.
-You can check the pairwise Pearsons' correlation of each factor pair in each cohort via a correlation
-                         matrix plot for each cohort, accessible through the drop-down menu. By selecting a maximum allowable
-                         correlation via the input slider, the app returns each factor that correlate above the selected threshold
-                         by pressing the button. You may then select and thus exclude any of the highly correlating factors from the menu below and exclude 
-                         them from further analysis. The selection can be reset by pressing the `Reset Factor Exclusion`-button")
+                                     p("Highly correlating factors may cause multicolinearity-issues in the multivariable association.
+You can check the pairwise Pearsons' correlation of each factor pair in each cohort. By selecting a maximum permissible
+                         pairwise correlation via the input slider, the app lists factors that correlate above the selected threshold. You may then select and thus exclude any of the highly correlating factors from the menu below. The selection can be reset by pressing the `Reset Factor Exclusion`-button")
                             ),
                             tabPanel("Correlation", plotOutput("correlation.plot")), #  "700px" , width = "400px"
                             tabPanel("Factor Annotation", DT::dataTableOutput("preview.corr.annot.c"))
@@ -315,7 +309,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
     sidebarLayout(
       sidebarPanel(width = 3,
                    helpText("Compute multivariable association statistics for each metabolite and all avaiable factors in each cohort.
-                                You can also add multiple testing correction from the drop-down menu."),
+                                You may also select a method for multiple testing correction from the drop-down menu."),
                    actionButton(inputId =  "multivar.assoc.button", label =  "Multivariable Association", icon = icon("play-circle")),
                    tags$hr(),
                    selectInput(inputId = "multivar.multiple.testing.correction.selecter",
@@ -347,10 +341,10 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                                      tags$hr(),
                                      h4("Methods Description"),
                                      tags$hr(),
-                                     p("All factors not removed for high correlation will be regressed against each metabolite in each cohort in a multivariable linear regression model. Correction for multiple testing will be applied according to the selection from the drop-down menu. Visualizations are the same as in the univariable association step with the difference that the partial explained variance of each factor depending on all the other factors will be provided in addition to the adjusted R2 of the full model. The partial-R2 of a factor is computed as the difference of the R2 of the model including and the R2 of a model excluding the factor in question."),
+                                     p("All factors not removed for high correlation will be fit against each metabolite in each cohort in a multivariable linear regression model. P-value-correction for multiple testing will be applied according to the selection from the drop-down menu. Visualizations similar to the univariable association step will be presented, with the difference that the partial explained variance of each factor depending on all the other factors will be provided in addition to the adjusted R2 of the full model. The partial-R2 of a factor is computed as the difference of the R2 of the model including and the R2 of a model excluding the respective factor."),
                                      tags$hr(),
                                      h5("Factor-Cohort Interaction Test"),
-                                     p("In Case of more than one cohort data: Similar to the cohort interaction test during the univariable association step of the interaction of each factor with the cohort is analysed for each metabolite in a multivariable linear model. For this, an interaction effect for the cohort ID is added to the multivariable model for each predictor. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
+                                     p("In case of more than one cohort in the data: Similar to the cohort interaction test during the univariable association step of the interaction of each factor with the cohort is analysed for each metabolite in a multivariable linear model. For this, an interaction effect for the cohort ID is added to the multivariable model for each predictor. R-squared of the full model and the interaction term, as well as p-values of a Likelihood-Ratio test of the model withouth and with the interaction term are reported."),
                                      tags$hr(),
                                      textOutput("multivar.description")),
                             tabPanel("Boxplot", plotOutput("plot.multivar")),
@@ -374,7 +368,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                      tags$hr(),
                      helpText("Specify the parameters of the factor selection. Necessary parameters can be very data specific."),
                      tags$hr(),
-                     helpText("Decide on variance cutoff each factor needs to fulfill in at least one cohort"),
+                     helpText("Decide on variance threshold each factor needs to meet in at least one cohort"),
                      sliderInput(inputId = "r.squared.cutoff.slider",
                                  label = "Minimum Explained Variance per factor",
                                  min = 0,
@@ -403,9 +397,9 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                                  step = 0.01,
                                  sep = "."),
                      tags$hr(),
-                     helpText("Select factors that should be in the selection results mandatorily.
-                                   Use this to select factors that you know are important and you want to include in a confounder model regardless
-                                   of the variance it explains."),
+                     helpText("Select factors that should be included mandatorily.
+                                   Use this to select factors you know are important and you want to include in regardless
+                                   of its explained variance."),
                      selectInput(inputId = "mandatory.inclusion.selecter",
                                  label = "Forced Inclusions",
                                  choices = NULL, multiple = T, selected = NULL)),
@@ -436,7 +430,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                                      tags$hr(),
                                      h4("Methods Description"),
                                      tags$hr(),
-                                     p("This steps allowes the search for factors explaining a certain amount of variation in your data, e.g. for use as a consensus factor model for subsequent analysis via backwards selection. This method removes factors not explaining a set amount of variance in at least one metabolite. This allows for conservative analysis of data via the maximum partial explained variance per factor per cohort. The cutoff can be set manually or the default may be chosen. Additionally, it is possible to include a set of factors as mandatory facors that will be classified as relevent irrespective of their explained variance. This may be useful in case certain factors are known to influence predictors. Downloadable results include metabolite and factor annotations, partial explained variances of the relevant as well as the irrelevant (according to the set threshold) factors."),
+                                     p("Search for factors explaining a threshold-amount of variation in your data, e.g. for use as a consensus factor model for subsequent regression analysis. This method removes factors not explaining a set amount of variance in at least one metabolite and cohort. It is possible to mandatorily include a set of factors as that will be selected irrespective of their explained variance (and/or missingness). This may be useful in case certain factors are known to influence metabolites. Downloadable results include metabolite and factor annotations, partial explained variances of all factors."),
                                      tags$hr(),
                                      textOutput("selection.description")),
                             tabPanel(HTML("Plot/<br/>Settings"),
@@ -446,7 +440,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                             ),
                             tabPanel(HTML("Relevant<br/>Factors"),
                                      h4("Your relevant factors are:"),
-                                     helpText("This table displays the maximum-partial-r-squared found per factor per cohort that passed the set threshold."),
+                                     helpText("This table displays the maximum-partial-r-squared per factor and cohort."),
                                      tags$hr(),
                                      DT::dataTableOutput("res.full.model")
                             ),
