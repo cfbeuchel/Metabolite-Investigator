@@ -401,7 +401,7 @@ You can check the pairwise Pearsons' correlation of each factor pair in each coh
                                    Use this to select factors you want to include in the selection results regardless
                                    of their explained variance."),
                      selectInput(inputId = "mandatory.inclusion.selecter",
-                                 label = "Mandatory Inclusion of Factors:",
+                                 label = "Mandatory Inclusion of Factors",
                                  choices = NULL, multiple = T, selected = NULL)),
                    # sidebarPanel(width = 3,
                    conditionalPanel(
