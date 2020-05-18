@@ -199,7 +199,7 @@ ui <-  navbarPage(
                                      p("Choose whether you want to pre-process your metabolite data. Pre-processing include three optional steps."),
                                      p("1) An outlier filter of 5*SD on log-transformed data."),
                                      p("2) A rank-based inverse-normal transformation, matching the rank of each measurement to the quantiles of a standard normal distribution with a mean of 0 and a standard deviation of 1."),
-                                     p("3) A batch-correction of known technical batches via a non-parametric empirical Bayes method implemented in sva::ComBat.  Missing values are mean imputed for the analysis and missingness will be restored afterwards. Batches with only a single value entry will be removed from further analysis. Batches with low variance cannot be removed by ComBat and will thus be removed via a linear model. Method of batch adjustment will be entered in the annotation file."),
+                                     p("3) A batch-correction of known technical batches via a non-parametric empirical Bayes method implemented in sva::ComBat.  Missing values are mean imputed for the analysis and missingness will be restored afterwards. Batches with only a single value entry will be removed from further analysis. Batches with low variance cannot be removed by ComBat and will thus be removed via a mixed linear model. Method of batch adjustment will be entered in the annotation file."),
                                      tags$hr(),
                                      textOutput("prepro.description")),
                             tabPanel("Data", DT::dataTableOutput("prepro.data")),
@@ -279,7 +279,7 @@ ui <-  navbarPage(
                                sep = "."),
                    tags$hr(),
                    helpText("Select a cohort to display the pairwise correlation of its factors:"),
-                   selectInput(inputId = "plot.corr.select", label = "Display Correlation in Cohort", multiple = F, choices = NULL),
+                   selectInput(inputId = "plot.corr.select", label = "Display Correlation in Study", multiple = F, choices = NULL),
                    tags$hr(),
                    helpText("This panel displays factors correlated above the specified threshold to be optionally removed."),
                    selectInput(inputId = "exclude.corr.select", label = "Exclude Correlating Factors", multiple = T, choices = NULL),
@@ -295,7 +295,7 @@ ui <-  navbarPage(
                                      h4("Methods Description"),
                                      tags$hr(),
                                      p("Highly correlating factors may cause multicolinearity-issues in the multivariable association.
-You can check the pairwise Pearsons' correlation of each factor pair in each cohort. By selecting a maximum permissible
+You can check the pairwise Pearsons' correlation of each factor pair in each study. By selecting a maximum permissible
                          pairwise correlation via the input slider, the app lists factors that correlate above the selected threshold. You may then select and thus exclude any of the highly correlating factors from the menu below. The selection can be reset by pressing the `Reset Factor Exclusion`-button")
                             ),
                             tabPanel("Correlation", plotOutput("correlation.plot")), #  "700px" , width = "400px"

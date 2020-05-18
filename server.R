@@ -111,7 +111,10 @@ server <- function(input, output, session) {
                              quote = input$quote.metab)
         input.metab
       }, error = function(e) {
-        stop(safeError(e))
+        # stop(safeError(e))
+        
+        return(paste0("Error in calculation! Please check your input! Error message:",as.character(e)))
+        
       }
     )
   }, options = list(pageLength = 10))
@@ -394,7 +397,7 @@ server <- function(input, output, session) {
     # }
     
     # update selector for correlation
-    updateSelectInput(session, "plot.corr.select","Display Correlation in Cohort", choices = unique(dat$cohort))
+    updateSelectInput(session, "plot.corr.select","Display Correlation in Study", choices = unique(dat$cohort))
     updateSelectInput(session, "network.uni.select","Display bi-partite Network for", choices = unique(dat$cohort))
     updateSelectInput(session, "network.multi.select","Display bi-partite Network for", choices = unique(dat$cohort))
     

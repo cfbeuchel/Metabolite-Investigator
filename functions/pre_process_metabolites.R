@@ -192,7 +192,7 @@ pre_process_metabolites <- function(
           # warning for failed adjustment
           message(paste0("Batch adjustment in ComBat failed for the metabolites ",
                          paste(failed.metabs, collapse = ", "),
-                         ". They will be adjusted in a linear model."))
+                         ". They will be adjusted in a mixed linear model."))
           
           # warning(paste0("The metabolites",
           #                paste(exclude.metabs, collapse = ", "),
@@ -203,15 +203,25 @@ pre_process_metabolites <- function(
           lapply(failed.metabs, function(y){
             
             # y <- failed.metabs[1]
-            metab.formula <- as.formula(paste0(y, " ~ batch"))
-            metab.lm <- lm(metab.formula, data = dat[cohort %in% (x), ])
+            # metab.formula <- as.formula(paste0(y, " ~ batch"))
+            # metab.lm <- lm(metab.formula, data = dat[cohort %in% (x), ])
+            
+            # 180520: Use lmer instead of lm for manual batch adjustment
+            metab.formula <- as.formula(paste0(y, " ~ 1 + (1 | batch)"))
+            metab.lm <- lmer(metab.formula, data = dat[cohort %in% (x), ])
+            
+            batch.effects <- as.data.table(coef(metab.lm)$batch,keep.rownames = T)
+            names(batch.effects) <- c("batch","intercept")
+            dat.adj <- dat[cohort %in% (x) , .SD, .SDcols = c("batch", y)]
+            names(dat.adj)[2] <- "metab"
+            dat.adj[,metab.adj:= metab - batch.effects[match(dat.adj$batch, batch.effects$batch), intercept]]
             
             # transform residuals back into right scale
-            res.1 <- metab.lm$residual
-            res.2 <- dat[ , mean(unlist(.SD)), .SDcols = y]  + res.1
+            # res.1 <- metab.lm$residual
+            # res.2 <- dat[ , mean(unlist(.SD)), .SDcols = y]  + res.1
             
             # re-enter data into main data object
-            set(x = dat.batch.adj, j = y, value = res.2)
+            set(x = dat.batch.adj, j = y, value = dat.adj$metab.adj)
           })
           message("Done!")
         } # end lm batch adjustment
