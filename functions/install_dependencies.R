@@ -10,6 +10,7 @@ install_dependencies <- function(){
     "magrittr",
     "visNetwork",
     "lmtest",
+    "lme4",
     "DT",
     "scales")
   

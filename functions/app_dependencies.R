@@ -22,6 +22,7 @@ library("magrittr")
 library("visNetwork")
 library("scales")
 library("lmtest")
+library("lme4")
 library("DT")
 
 # shiny Options - enable larger Upload sizes
