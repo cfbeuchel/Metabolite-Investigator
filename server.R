@@ -345,7 +345,7 @@ server <- function(input, output, session) {
         covariateColumns = c.cols)
       
     }) # end of progress indication
-
+    
     # re-assign output from prepro function
     annot.m <- res$annot.m
     dat <- res$dat
@@ -512,7 +512,7 @@ server <- function(input, output, session) {
                    pColumn = p.col,
                    cohort = input$network.uni.select,
                    hierarchicalNetwork = input$network.uni.hierarch)
-      })
+    })
     
     # plot the unviaraiable results
     output$plot.univar <- renderPlot({
@@ -587,7 +587,7 @@ server <- function(input, output, session) {
                         # pch.cex = 1.0,
                         # tl.cex = 0.6,
                         col = colorRampPalette(c("red", "white", "#006027"))(20),
-                        title = "Univariable Interaction factor*cohort signed R2",
+                        title = "Signed R2 for univariable interaction of factor x study",
                         mar=c(0, 0, 2, 0),
                         cl.length = 11)
       },width = ifelse(25*length(m.cols)<400,600,25*length(m.cols)), 
@@ -973,7 +973,7 @@ server <- function(input, output, session) {
       res.multi.int.out$cohort <- NULL
       
     }else{
-    res.multi.int.out <- copy(interaction.multivar)
+      res.multi.int.out <- copy(interaction.multivar)
     } # end interaction IF
     # End: Multi interaction Plot
     
@@ -1179,8 +1179,19 @@ server <- function(input, output, session) {
     # })
     
     # Output
-    output$res.all.multi <- DT::renderDataTable(isolate(values$all.multi), options = list(pageLength = 10))
-    output$res.full.model <- DT::renderDataTable(isolate(values$full.model.r.squared), options = list(pageLength = 10))
+    output$res.all.multi <- DT::renderDataTable(
+      datatable(
+        isolate(values$all.multi),
+        options = list(pageLength = 10)) %>% 
+        formatRound(
+          columns = c(4:8,12:13),
+          digits = 3))
+    output$res.full.model <- DT::renderDataTable(datatable(
+      isolate(values$full.model.r.squared),
+      options = list(pageLength = 10)) %>% 
+        formatRound(
+          columns = unique(values$dat$cohort),
+          digits = 3))
     output$res.annot.m <- DT::renderDataTable(isolate(values$annot.m), options = list(pageLength = 10))
     output$res.annot.c <- DT::renderDataTable(isolate(values$annot.c), options = list(pageLength = 10))
   })
