@@ -26,7 +26,7 @@ server <- function(input, output, session) {
   values$res.int.multivar <- list("Nothing to download, yet!")
   values$all.multi <- list("Nothing to download, yet!")
   values$full.mode.r.squared <- list("Nothing to download, yet!")
-  
+  values$methods <- list("Nothing to download, yet!")
   
   # show example data
   output$preview.example <- DT::renderDataTable({
@@ -84,42 +84,6 @@ server <- function(input, output, session) {
     # output some text when using example data
     output$preview.text <- renderText({"Using example data (2 cohorts with each 5000 samples, 7 metabolites and 6 factors) for analysis."})
   })
-  
-  # Data Preview ----
-  # preview covar data
-  output$preview.covar <- DT::renderDataTable({
-    req(input$input.covar)
-    tryCatch(
-      {
-        input.covar <- fread(input$input.covar$datapath,
-                             sep = input$sep.covar,
-                             quote = input$quote.covar)
-        input.covar
-      }, error = function(e) {
-        stop(safeError(e))
-      }
-    )
-  }, options = list(pageLength = 10))
-  
-  # Preview metabolite Data
-  output$preview.metab <- DT::renderDataTable({
-    req(input$input.metab)
-    tryCatch(
-      {
-        input.metab <- fread(input$input.metab$datapath,
-                             sep = input$sep.metab,
-                             quote = input$quote.metab)
-        input.metab
-      }, error = function(e) {
-        # stop(safeError(e))
-        
-        return(paste0("Error in calculation! Please check your input! Error message:",as.character(e)))
-        
-      }
-    )
-  }, options = list(pageLength = 10))
-  
-  
   # Upload ----
   observeEvent({
     input$input.metab
@@ -164,6 +128,87 @@ server <- function(input, output, session) {
     # output message
     output$covar.upload.success <- renderText("Factor data uploaded successfully. Please make sure it is the right data.")
   })
+  
+  # preformatted data
+  observeEvent({
+    input$input.preform
+  },{
+    
+    # read the data
+    rawdat <- readLines(input$input.preform$datapath)
+    
+    # parse data
+    parseddat <- parse_rawdat(rawdat)
+    
+    # metab
+    values$input.metab <- parseddat$metab
+    
+    # covar
+    values$input.covar <- parseddat$covar
+    
+    # update columns selection in the next step
+    
+    # update button
+    updateSelectInput(session, 
+                      "covar.id",
+                      # "Select Covariate ID Column", 
+                      choices = names(values$input.covar))
+    
+    # Update select input immediately after clicking on the action button.
+    updateSelectInput(session,
+                      "metab.id",
+                      # "Select Metabolite ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[3])
+    updateSelectInput(session, 
+                      "cohort.col",
+                      # "Select Metabolite Cohort ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[1])
+    updateSelectInput(session, 
+                      "batch.col",
+                      # "Select Metabolite Batch ID Column", 
+                      choices = names(values$input.metab), 
+                      selected = names(values$input.metab)[2])
+    
+    # output success message
+    output$preview.text <- renderText("Data upload was successfull! Please check the preview below to see if the file was parsed correctly. In order to avoid downstream error, singular (with only one entry) metabolites and factors were removed.")
+    
+  })
+  
+  # Data Preview ----
+  # preview covar data
+  output$preview.covar <- DT::renderDataTable({
+    req(values$input.covar)
+    tryCatch(
+      {
+        # input.covar <- fread(input$input.covar$datapath,
+        #                      sep = input$sep.covar,
+        #                      quote = input$quote.covar)
+        values$input.covar
+      }, error = function(e) {
+        stop(safeError(e))
+      }
+    )
+  }, options = list(pageLength = 10))
+  
+  # Preview metabolite Data
+  output$preview.metab <- DT::renderDataTable({
+    req(values$input.metab)
+    tryCatch(
+      {
+        # input.metab <- fread(input$input.metab$datapath,
+        #                      sep = input$sep.metab
+        #                      quote = input$quote.metab)
+        values$input.metab
+      }, error = function(e) {
+        # stop(safeError(e))
+        
+        return(paste0("Error in calculation! Please check your input! Error message:",as.character(e)))
+        
+      }
+    )
+  }, options = list(pageLength = 10))
   
   # Covariate/Metabolite column selection ----
   observeEvent(input$rest.covar,{
@@ -262,6 +307,15 @@ server <- function(input, output, session) {
     
     # save an indicator that the previous step was sucessful
     values$success.merge <- 1
+    
+  })
+  
+  # DT threads ----
+  observeEvent(input$dt.threads.selection,{
+    
+    # setDTthreads(0)
+    
+    setDTthreads(input$dt.threads.selection)
     
   })
   
@@ -1168,8 +1222,29 @@ server <- function(input, output, session) {
     values$sucess.select <- 1
     
     # Methods Description 
-    # placeholder
-    selection.description <- NULL
+    observeEvent(values$sucess.select,{
+      
+      req(values$sucess.select == 1)
+      
+      values$methods <- methods_block(
+        outlier.check = ifelse("Outlier Filter of 5*SD" %in% input$button.prepro.steps, TRUE, FALSE),
+        max.removed = ifelse(max(values$annot.m$filtered.samples == 0), 
+                             "none",
+                             paste(unique(values$annot.m[, metabolite[filtered.samples==max(filtered.samples)]]),sep=", ")
+        ),
+        int.check = ifelse("Inverse-Normal Transformation" %in% input$button.prepro.steps, TRUE, FALSE),
+        batch.check = ifelse("Batch Adjustment" %in% input$button.prepro.steps, TRUE, FALSE),
+        batch.name = input$batch.col,
+        n.batches = paste(values$dat[,uniqueN(batch),by=cohort]$V1,sep=", "),
+        study.names = paste(unique(values$dat$cohort),sep=", "),
+        non.combat.metabs = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(metabolite),sep=", ")],
+        non.combat.studies = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(cohort),sep=", ")],
+        corr.cutoff = input$corr.cut.slider,
+        r.sqr.min = input$r.squared.cutoff.slider,
+        pval.corr = input$multiple.testing.correction.selecter
+      )
+      
+    })
     
     # output methods text
     # output$selection.description <- renderText({
@@ -1226,6 +1301,14 @@ server <- function(input, output, session) {
     filename = "Association_Results.csv",
     content = function(file) {
       fwrite(isolate(values$all.multi), file)
+    }
+  )
+  
+  # methods description
+  output$download.methods <- downloadHandler(
+    filename = "Methods_Description.txt",
+    content = function(file) {
+      write.table(isolate(values$methods), file)
     }
   )
 }

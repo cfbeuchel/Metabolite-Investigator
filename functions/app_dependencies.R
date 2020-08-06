@@ -60,6 +60,12 @@ source("functions/multiple_testing_correction.R")
 source("functions/generic_multiple_testing_correction.R")
 source("functions/remaining_covariates.R")
 source("functions/partial_r_squared_excluded_covars.R")
+source("functions/parse_rawdat.R")
+source("functions/parse_mztab.R")
+source("functions/parse_mwtab.R")
+source("functions/str_extract.R")
+source("functions/max_threads.R")
+source("functions/methods_block.R")
 
 # Thx @Jonas Wagner for this simple solution to the weird empty plot bug
 pdf(NULL)

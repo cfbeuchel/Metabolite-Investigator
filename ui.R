@@ -105,7 +105,26 @@ ui <-  navbarPage(
                                 choices = c(None = "",
                                             "Double Quote" = '"',
                                             "Single Quote" = "'"),
-                                selected = '"')
+                                selected = '"'),
+                   
+                   tags$hr(),
+                   
+                   h4("mwTab & mzTab-M (2.0.0)"),
+                   
+                   helpText("Tab-delimited text files formatted after the mwTab (Metabolomics Workbench) or the mzTab-M 2.0.0 standard are supported. For instant usability of a wide variety of data sets, download a correctly formatted data set from a repository and upload it here"),
+                   
+                   # Upload selection for formatted data
+                   fileInput('input.preform', 'Choose pre-formatted file to upload',
+                             accept = c(
+                               'text/csv',
+                               'text/comma-separated-values',
+                               'text/tab-separated-values',
+                               'text/plain',
+                               '.csv',
+                               '.tsv'
+                             ))
+                   
+                   
       ), # END Sidebar panel
       
       mainPanel(width = 5,
@@ -215,7 +234,18 @@ ui <-  navbarPage(
       sidebarPanel(width = 3,
                    helpText("Compute univariable association statistics for each metabolite and factor in each cohort.
                                 You can also select a method for multiple testing correction."),
-                   actionButton(inputId =  "univar.assoc.button", label =  "Univariable Association", icon = icon("play-circle")),
+                   actionButton(inputId =  "univar.assoc.button",
+                                label =  "Univariable Association", 
+                                icon = icon("play-circle")),
+                   tags$hr(),
+                   helpText("Choose the maximum number of CPU-threads for this analysis."),
+                   sliderInput(inputId = "dt.threads.selection",
+                               label = "CPU Threads",
+                               min = 1,
+                               max = max_threads(),
+                               value = 1,
+                               step = 1,
+                               sep = "."),
                    tags$hr(),
                    selectInput(inputId = "univar.multiple.testing.correction.selecter",
                                label = "Method for multiple testing correction",
@@ -312,6 +342,15 @@ You can check the pairwise Pearsons' correlation of each factor pair in each stu
                                 You may also select a method for multiple testing correction from the drop-down menu."),
                    actionButton(inputId =  "multivar.assoc.button", label =  "Multivariable Association", icon = icon("play-circle")),
                    tags$hr(),
+                   helpText("Choose the maximum number of CPU-threads for this analysis."),
+                   sliderInput(inputId = "dt.threads.selection",
+                               label = "CPU Threads",
+                               min = 1,
+                               max = max_threads(),
+                               value = 1,
+                               step = 1,
+                               sep = "."),
+                   tags$hr(),
                    selectInput(inputId = "multivar.multiple.testing.correction.selecter",
                                label = "Correction for multiple testing",
                                choices = list("Bonferroni" = "bonferroni",
@@ -366,6 +405,15 @@ You can check the pairwise Pearsons' correlation of each factor pair in each stu
                      helpText("Press this button to start factor selection."),
                      actionButton(inputId = "start.selection.button", label = "Factor Selection", icon = icon("play-circle")),
                      tags$hr(),
+                     helpText("Choose the maximum number of CPU-threads for this analysis."),
+                     sliderInput(inputId = "dt.threads.selection",
+                                 label = "CPU Threads",
+                                 min = 1,
+                                 max = max_threads(),
+                                 value = 1,
+                                 step = 1,
+                                 sep = "."),
+                     tags$hr(),
                      helpText("Specify the parameters for factor selection."),
                      tags$hr(),
                      helpText("Choose threshold for explained variance used to select relevant factors"),
@@ -418,7 +466,10 @@ You can check the pairwise Pearsons' correlation of each factor pair in each stu
                      downloadButton("download.annot.m", "Download", class = "butt"),
                      tags$hr(),
                      helpText("Download Factor Annotation:"),
-                     downloadButton("download.annot.c", "Download", class = "butt")
+                     downloadButton("download.annot.c", "Download", class = "butt"),
+                     tags$hr(),
+                     helpText("Download Methods Text:"),
+                     downloadButton("download.methods", "Download", class = "butt")
                    ) # conditionalPanel
       ), # sidebarPanel
       mainPanel(width = 5,
