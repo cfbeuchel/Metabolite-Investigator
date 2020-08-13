@@ -1,5 +1,7 @@
 # Metabolite-Investigator
 
+<img align="right" width="35%" height="auto" src="hex_metinv.png">
+
 ## Description
 
 This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). Features of the App are:
