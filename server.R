@@ -561,7 +561,7 @@ server <- function(input, output, session) {
     output$network.univar <- renderVisNetwork({
       
       # construct network plot
-      network_plot(assocResults = copy(res.univar),
+      network_plot(assocResults = copy(res.univar[metab %in% m.cols[1:100],]),
                    rSquaredColumn = "r.squared",
                    pColumn = p.col,
                    cohort = input$network.uni.select,
@@ -580,7 +580,7 @@ server <- function(input, output, session) {
     )
     
     # reformat results for heatmap
-    uni.max.matrix <- make_matrices(dat = res.univar,
+    uni.max.matrix <- make_matrices(dat = res.univar[metab %in% m.cols[1:100],],
                                     r2Col = "r.squared",
                                     pCol = "tmp.p.adj",
                                     significant = "tmp.sig")
@@ -621,7 +621,7 @@ server <- function(input, output, session) {
         r2Col = "interaction.r.squared",
         pCol = "tmp.p.adj", 
         sigCol = "tmp.sig",
-        dat = interaction.univar,
+        dat = interaction.univar[metab %in% m.cols[1:100],],
         clustMethod = "ward.D2")
       
       rowOrderMaxR2 = rownames(uni.int.form$r2matrix)
@@ -932,7 +932,7 @@ server <- function(input, output, session) {
     output$network.multivar <- renderVisNetwork({
       
       # construct network plot
-      network_plot(assocResults = copy(res.multivar),
+      network_plot(assocResults = copy(res.multivar[metab %in% m.cols[1:100],]),
                    rSquaredColumn = "term.r.squared",
                    pColumn = p.col,
                    cohort = input$network.multi.select,
@@ -952,13 +952,16 @@ server <- function(input, output, session) {
     )
     
     # reformat results for heatmap
-    multi.max.matrix <- make_matrices(dat = res.multivar,
+    multi.max.matrix <- make_matrices(dat = res.multivar[metab %in% m.cols[1:100],],
                                       r2Col = "term.r.squared",
                                       pCol = p.col, 
                                       significant = "tmp.sig")
     
     # build heatmap of results
     output$heat.multivar <- renderPlot({
+      
+      req(multi.max.matrix$r2matrix)
+      
       custom_corrplot(multi.max.matrix$r2matrix,
                       method="color",
                       is.corr = F,
@@ -993,13 +996,15 @@ server <- function(input, output, session) {
         r2Col = "interaction.r.squared",
         pCol = "tmp.p.adj", 
         sigCol = "tmp.sig",
-        dat = interaction.multivar,
+        dat = interaction.multivar[metab %in% m.cols[1:100],],
         clustMethod = "ward.D2")
       
       rowOrderMaxR2 = rownames(multi.int.form$r2matrix)
       colOrderMaxR2 = colnames(multi.int.form$r2matrix)
       
       output$heat.int.multivar <- renderPlot({
+        
+        req(multi.int.form$r2matrix)
         
         # plot 
         custom_corrplot(multi.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
@@ -1037,8 +1042,13 @@ server <- function(input, output, session) {
     res.multi.out$tmp.p.adj <- NULL
     
     # save results for output
+    req(res.multi.out)
     output$res.multivar <- DT::renderDataTable(res.multi.out, options = list(pageLength = 10))
+    
+    req(res.multi.int.out)
     output$res.int.multivar <- DT::renderDataTable(res.multi.int.out, options = list(pageLength = 10))
+    
+    
     values$res.multivar <- res.multi.out
     values$res.int.multivar <- res.multi.int.out
     values$annot.c <- annot.c
@@ -1230,15 +1240,15 @@ server <- function(input, output, session) {
         outlier.check = ifelse("Outlier Filter of 5*SD" %in% input$button.prepro.steps, TRUE, FALSE),
         max.removed = ifelse(max(values$annot.m$filtered.samples == 0), 
                              "none",
-                             paste(unique(values$annot.m[, metabolite[filtered.samples==max(filtered.samples)]]),sep=", ")
+                             paste(unique(values$annot.m[, metabolite[filtered.samples==max(filtered.samples)]]),collapse=", ")
         ),
         int.check = ifelse("Inverse-Normal Transformation" %in% input$button.prepro.steps, TRUE, FALSE),
         batch.check = ifelse("Batch Adjustment" %in% input$button.prepro.steps, TRUE, FALSE),
         batch.name = input$batch.col,
-        n.batches = paste(values$dat[,uniqueN(batch),by=cohort]$V1,sep=", "),
-        study.names = paste(unique(values$dat$cohort),sep=", "),
-        non.combat.metabs = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(metabolite),sep=", ")],
-        non.combat.studies = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(cohort),sep=", ")],
+        n.batches = paste(values$dat[,uniqueN(batch),by=cohort]$V1,collapse=", "),
+        study.names = paste(unique(values$dat$cohort),collapse=", "),
+        non.combat.metabs = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(metabolite),collapse=", ")],
+        non.combat.studies = values$annot.m[batch.adjustment.in == "linear_model", paste(unique(cohort),collapse=", ")],
         corr.cutoff = input$corr.cut.slider,
         r.sqr.min = input$r.squared.cutoff.slider,
         pval.corr = input$multiple.testing.correction.selecter
