@@ -43,12 +43,12 @@ parse_rawdat <- function(rawdat = NULL){
     sing.cols <- sapply(names(dat$metab),function(i){
       all(is.na(dat$metab[[i]]))
     })
-    mzmetabdat[, names(na.cols[na.cols==T]) := NULL]
+    dat[, names(na.cols[na.cols==T]) := NULL]
     
-    sing.cols <- sapply(names(mzmetabdat),function(i){
-      all(is.na(mzmetabdat[[i]]))
+    sing.cols <- sapply(names(dat),function(i){
+      all(is.na(dat[[i]]))
     })
-    mzmetabdat[, names(na.cols[na.cols==T]) := NULL]
+    dat[, names(na.cols[na.cols==T]) := NULL]
     
   }
   
