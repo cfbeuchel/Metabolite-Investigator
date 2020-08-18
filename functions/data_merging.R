@@ -70,7 +70,24 @@ data_merging <- function(
   dat[, (c.cols[c.categorical]) := lapply(.SD, as.factor), .SDcols = c.cols[c.categorical]]
   dat[, (c.cols[c.continuous])  := lapply(.SD, as.numeric), .SDcols = c.cols[c.continuous]]
   
+  # check for only NA columns and remove them with a warning!
+  na.factors <- sapply(c.cols, function(i){
+    all(is.na(dat[[i]]))
+  })
+  
+  if(any(na.factors==TRUE)){
+    
+    dat[, (names(na.factors)[na.factors==TRUE]) := NULL]
+    dat[, (names(na.factors)[na.factors==TRUE]) := c(
+      "Too many unique factors. Model is unsuitable for this type of data. Factor will be removed.",
+      rep(NA, times= .N-1))]
+    
+    
+    merge.message <- paste0(merge.message, " The factors ", paste(names(na.factors)[na.factors==TRUE], collapse = ", "), " have too many levels and are removed from further analysis.")
+  }
+  
   # return results
   return(list(dat = dat,
-              message = merge.message))
+              message = merge.message,
+              na.cols = na.factors))
 }

@@ -37,18 +37,18 @@ parse_rawdat <- function(rawdat = NULL){
     
   }
   
-  # remove singluar columns
+  # remove singluar & NA columns
   if(raw.type %in% c("mwtab", "mztab")){
     
-    sing.cols <- sapply(names(dat$metab),function(i){
-      all(is.na(dat$metab[[i]]))
+    na.cols <- sapply(names(dat$metab)[!(names(dat$metab) %in% c("dummy.study", "dummy.batch"))],function(i){
+      all(is.na(dat$metab[[i]])) | (is.numeric(dat$metab[[i]]) & uniqueN(dat$metab[[i]]) == 1)
     })
-    dat[, names(na.cols[na.cols==T]) := NULL]
+        dat$metab[, names(na.cols[na.cols==T]) := NULL]
     
-    sing.cols <- sapply(names(dat),function(i){
-      all(is.na(dat[[i]]))
+    na.cols <- sapply(names(dat$covar),function(i){
+      all(is.na(dat$covar[[i]])) | (is.numeric(dat$covar[[i]]) & uniqueN(dat$covar[[i]]) == 1)
     })
-    dat[, names(na.cols[na.cols==T]) := NULL]
+    dat$covar[, names(na.cols[na.cols==T]) := NULL]
     
   }
   

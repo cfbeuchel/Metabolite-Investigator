@@ -293,17 +293,19 @@ server <- function(input, output, session) {
                             metaboliteColumns = values$m.cols,
                             cohortID = values$cohort.col,
                             batchID = values$batch.col)
-    
-    # re-assign
-    values$dat <- results[["dat"]]
     output$text.found.overlap <- renderText(results[["message"]])
     
     # helper text
     output$text.merge.upper <- renderText("Check if ID, batch and cohort columns have been labeled correctly. If everything seems in order, move to the next step.")
     
     # preview
-    merged.preview <- values$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
+    merged.preview <- results$dat[, .SD, .SDcols = c("cohort", "batch", "id", values$c.cols, values$m.cols)]
     output$data.merge <- DT::renderDataTable({merged.preview}, options = list(pageLength = 10))
+    
+    # re-assign
+    results[["dat"]][, (names(results$na.cols)[results$na.cols == TRUE]) := NULL]
+    values$dat <- results[["dat"]]
+    values$c.cols <- names(results$na.cols)[results$na.cols == FALSE]
     
     # save an indicator that the previous step was sucessful
     values$success.merge <- 1
@@ -529,7 +531,7 @@ server <- function(input, output, session) {
         interaction.test <- TRUE
         
       } else{
-        interaction.univar <- "Only one cohort. No Interactions to test!"
+        interaction.univar <- data.frame(X = "Only one cohort. No Interactions to test!")
         interaction.test <- FALSE
       }
     }) 
@@ -629,6 +631,8 @@ server <- function(input, output, session) {
       
       output$heat.int.univar <- renderPlot({
         
+        req(uni.int.form$r2matrix)
+        
         # plot 
         custom_corrplot(uni.int.form$r2matrix[rowOrderMaxR2, colOrderMaxR2],
                         p.mat = uni.int.form$pvalmatrix[rowOrderMaxR2, colOrderMaxR2],
@@ -672,7 +676,9 @@ server <- function(input, output, session) {
     values$success.uni <- 1
     
     # save interaction results for output
-    output$res.int.univar <- DT::renderDataTable(res.uni.int.out, options = list(pageLength = 10))
+    output$res.int.univar <- DT::renderDataTable({
+      res.uni.int.out
+      }, options = list(pageLength = 10))
     values$res.int.univar <- res.uni.int.out
     
     # placeholder
@@ -902,7 +908,7 @@ server <- function(input, output, session) {
         interaction.test <- TRUE
         
       } else{
-        interaction.multivar <- "Only one cohort. No Interactions to test!"
+        interaction.multivar <- data.frame(X = "Only one cohort. No Interactions to test!")
         interaction.test <- FALSE
       }
       

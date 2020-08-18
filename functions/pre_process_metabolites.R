@@ -120,7 +120,7 @@ pre_process_metabolites <- function(
     
     
     # "Batch Adjustment"
-    if("Batch Adjustment" %in% preProcessingSteps){
+    if("Batch Adjustment" %in% preProcessingSteps & uniqueN(dat$batch) > 1){
       
       message("Batch Adjusting Data")
       
