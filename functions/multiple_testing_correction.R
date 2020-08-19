@@ -18,6 +18,10 @@ multiple_testing_correction <- function(
   # remove NA elements from merging (in case no covariate was selected)
   all.multi <- all.multi[!is.na(cohort),]
   
+  # save failed associations to return lager
+  failed.multi <- all.multi[is.na(p.value)]
+  all.multi <- all.multi[!is.na(p.value)]
+  
   # return empty data in case there are missings in the pval column
   if(any(is.na(all.multi$p.value))){
     
@@ -100,6 +104,7 @@ multiple_testing_correction <- function(
   
   # reorder columns
   setnames(all.multi, old = c("term", "response"), new = c("covariate", "metabolite"))
+  setnames(failed.multi, old = c("term", "response"), new = c("covariate", "metabolite"))
   all.multi[, .SD, .SDcols = c("cohort",
                                "covariate",
                                "metabolite",
@@ -112,6 +117,9 @@ multiple_testing_correction <- function(
                                "n",
                                "r.squared.cutoff"
                                )]
+  
+  # add failed multi again to return
+  all.multi <- rbindlist(list(all.multi,failed.multi), use.names = T, fill = T)
   
   return(all.multi)
 }

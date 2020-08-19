@@ -75,7 +75,7 @@ find_relevant_covariates <- function(
   
   # bind before casting 
   # old : pr2sel.res <- rbindlist(all.pr2sel.res)
-  pr2sel.res <- (all.pr2sel.res)
+  pr2sel.res <- rbindlist(all.pr2sel.res)
   
   # print the model selection result
   final.res.paper <- pr2sel.res[
