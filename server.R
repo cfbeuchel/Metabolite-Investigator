@@ -1113,6 +1113,21 @@ server <- function(input, output, session) {
   )
   
   # Covariable Selection ----
+  
+  # update slider/text input
+  observeEvent({
+    input$r.squared.cutoff.slider
+  },{
+    updateTextInput(session, "r.squared.cutoff.text", value = input$r.squared.cutoff.slider)
+  })
+  observeEvent({
+  input$r.squared.cutoff.text
+  },{
+    updateSliderInput(session, "r.squared.cutoff.slider", value = input$r.squared.cutoff.text)
+    })
+  
+  
+  
   # get parameters
   observe({
     values$r.squared.cutoff <- input$r.squared.cutoff.slider
