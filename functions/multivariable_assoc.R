@@ -22,12 +22,12 @@ multivariable_assoc <- function(dometab, docovar, data, r_on_server = F) {
         # get the full lm formulas
         my.full.formula <- as.formula(
           paste0(
-            my.metab, " ~ ",
+            "`", my.metab, "`", " ~ ",
             paste(all.covars,
                   collapse = " + ")))
         my.reduced.formula <- as.formula(
           paste0(
-            my.metab, " ~ 1",
+            "`", my.metab, "`", " ~ 1",
             ifelse(length(all.covars) == 1, "", " + "),
             paste(all.covars[which(all.covars != my.covar)], collapse = " + ")))
         

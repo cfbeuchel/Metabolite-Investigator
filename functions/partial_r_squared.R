@@ -23,7 +23,7 @@ partial_r_squared <- function(cohort,
     # start by checking for singular predictors
     my.test.formula <- as.formula(
       paste0(
-        my.metab, " ~ ",
+        "`", my.metab, "`", " ~ ",
         paste(all.covars,
               collapse = " + ")))
     mm <- model.matrix(my.test.formula, data[cohort == my.cohort, ])
@@ -38,71 +38,103 @@ partial_r_squared <- function(cohort,
     # inner loop over all predictors
     r.squared.one.metab <- lapply(all.covars, function(my.covar){
       
+      if(verbose==T) message(my.covar)
+      
       # my.metab <- all.metabs[1] # debug 
       # my.covar <- all.covars[5] # debug 
       
       # start by building the full and minus one model
       my.full.formula <- as.formula(
         paste0(
-          my.metab, " ~ ",
+          "`", my.metab, "`", " ~ ",
           paste(all.covars,
                 collapse = " + ")))
       my.reduced.formula <- as.formula(
         paste0(
-          my.metab, " ~ 1",
+          "`", my.metab, "`", " ~ 1",
           ifelse(length(all.covars) == 1, "", " + "),
           paste(all.covars[which(all.covars != my.covar)], collapse = " + ")))
-      
-      # fit the two models
-      my.full.model <- summary(lm(formula = my.full.formula, data = data[cohort == my.cohort, ]))
-      my.reduced.model <- summary(lm(formula = my.reduced.formula, data = data[cohort == my.cohort, ]))
-      
-      # extract the explained variance 
-      my.full.r.squared <- my.full.model$r.squared
-      my.full.r.squared[my.full.r.squared<0] <- 0
-      my.full.r.squared.adj <- my.full.model$adj.r.squared
-      my.full.r.squared.adj[my.full.r.squared.adj<0] <- 0
-      my.reduced.r.squared <- my.reduced.model$r.squared
-      
-      # clean output
-      res <- as.data.frame(coefficients(my.full.model))
-      setDT(res, keep.rownames = T)
-      setnames(res, old = names(res), new = c("term",
-                                              "estimate",
-                                              "std.error",
-                                              "statistic",
-                                              "p.value"))
 
-      # in case of categorical, select the most significant one
-      res.single <- res[term %in% grep(pattern = (paste0("^", my.covar, "$")), x = res$term, value = T), ]
-      
-      if(nrow(res.single)!=1){
-        res.single <- res[term %in% grep(pattern = (paste0("^",my.covar, ".+$")), x = res$term, value = T), ]
-        if(nrow(res)!=0){
-          res.single <- res.single[p.value == min(p.value),]
-        }
-      }
-
-      # substract r-squares to get explained variance of my.covar
-      my.r.squared <- my.full.r.squared - my.reduced.r.squared
-      my.r.squared[my.r.squared < 0] <- 0
-      
-      # consolidate output
-      res.single[, `:=`(cohort = my.cohort,
-                 metab = my.metab,
-                 term = my.covar,
-                 term.r.squared = my.r.squared,
-                 model.r.squared = my.full.r.squared.adj,
-                 n = length(my.full.model$residuals),
-                 comment = NA)]
-      
-      # add error in case of removed singular
-      if(length(remove.sing)!=0){
-        res.single[,comment := paste0(
-          "Singular predictor(s) ", 
-          paste(remove.sing, collapse = ", "), 
-          " removed from model! Consider removing factors with high missingness prior to analysis!")]
-      }
+      res.single <- tryCatch(
+        {
+        
+          # fit the two models
+          my.full.model <- summary(lm(formula = my.full.formula, data = data[cohort == my.cohort, ]))
+          my.reduced.model <- summary(lm(formula = my.reduced.formula, data = data[cohort == my.cohort, ]))
+          
+          # extract the explained variance 
+          my.full.r.squared <- my.full.model$r.squared
+          my.full.r.squared[my.full.r.squared<0] <- 0
+          my.full.r.squared.adj <- my.full.model$adj.r.squared
+          my.full.r.squared.adj[my.full.r.squared.adj<0] <- 0
+          my.reduced.r.squared <- my.reduced.model$r.squared
+          
+          # clean output
+          res <- as.data.frame(coefficients(my.full.model))
+          setDT(res, keep.rownames = T)
+          setnames(res, old = names(res), new = c("term",
+                                                  "estimate",
+                                                  "std.error",
+                                                  "statistic",
+                                                  "p.value"))
+          
+          # in case of categorical, select the most significant one
+          res.single <- res[term %in% grep(pattern = (paste0("^", my.covar, "$")), x = res$term, value = T), ]
+          
+          if(nrow(res.single)!=1){
+            res.single <- res[term %in% grep(pattern = (paste0("^",my.covar, ".+$")), x = res$term, value = T), ]
+            if(nrow(res)!=0){
+              res.single <- res.single[p.value == min(p.value),]
+            }
+          }
+          
+          # substract r-squares to get explained variance of my.covar
+          my.r.squared <- my.full.r.squared - my.reduced.r.squared
+          my.r.squared[my.r.squared < 0] <- 0
+          
+          # consolidate output
+          res.single[, `:=`(cohort = my.cohort,
+                            metab = my.metab,
+                            term = my.covar,
+                            term.r.squared = my.r.squared,
+                            model.r.squared = my.full.r.squared.adj,
+                            n = length(my.full.model$residuals),
+                            comment = NA)]
+          
+          # add error in case of removed singular
+          if(length(remove.sing)!=0){
+            res.single[,comment := paste0(
+              "Singular predictor(s) ", 
+              paste(remove.sing, collapse = ", "), 
+              " removed from model! Consider removing factors with high missingness prior to analysis!")]
+          }
+          
+          return(res.single)
+          
+        }, error=function(cond){
+          
+          res.single <- data.table(
+            term = my.covar, 
+            estimate = NA, 
+            std.error = NA, 
+            statistic = NA, 
+            p.value = NA,
+            cohort = my.cohort, 
+            metab = my.metab, 
+            term.r.squared = NA,
+            model.r.squared = NA, 
+            n = NA, 
+            comment = gsub(
+              pattern = "\n", 
+              replacement = " ",
+              x = as.character(cond)
+              )
+          )  
+          
+          return(res.single)
+          
+          }
+      ) # end trycatch
       
       # return value
       return(res.single)

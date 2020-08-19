@@ -28,7 +28,7 @@ univariable_assoc <- function(dometab, docovar, data){
         # LINEAR MODEL --------------------------------------------------#
         
         # Fit the linear model 
-        myformula.lm <- as.formula(paste0(mymetab, " ~ ", mycovar))
+        myformula.lm <- as.formula(paste0("`", mymetab, "`", " ~ ", mycovar))
         mod <- summary(lm(formula = myformula.lm, data = mydata))
         
         # Clean the output

@@ -26,13 +26,29 @@ make_matrices <- function(dat,
   st2max_pval = dcast.data.table(st2max, metab ~ term, value.var = "pcorrMaxR2")
   st2max_pval_matrix = as.matrix(st2max_pval[,-'metab'])
   rownames(st2max_pval_matrix) =  st2max_pval$metab
-  cc <- hclust(dist(t(st2max_r2_matrix)), method = clustmethod)
-  # cc$order
-  # plot(cc)
-  # colnames(st2max_r2_matrix)[cc$order]
-  rc <- hclust(dist((st2max_r2_matrix)), method = clustmethod )
+  
+  # dont cluster single factor/metab matrices
   res = c()
-  res$r2matrix = t(st2max_r2_matrix[rc$order, cc$order])
-  res$pvalmatrix = t(st2max_pval_matrix[rc$order, cc$order])
+  
+  if(ncol(st2max_r2_matrix) > 1 & nrow(st2max_r2_matrix) > 1){
+    
+    cc <- hclust(dist(t(st2max_r2_matrix)), method = clustmethod)
+    # cc$order
+    # plot(cc)
+    # colnames(st2max_r2_matrix)[cc$order]
+    rc <- hclust(dist((st2max_r2_matrix)), method = clustmethod )
+    
+    res$r2matrix = t(st2max_r2_matrix[rc$order, cc$order])
+    res$pvalmatrix = t(st2max_pval_matrix[rc$order, cc$order])
+    
+  } else {
+    
+    res$r2matrix = t(st2max_r2_matrix)
+    res$pvalmatrix = t(st2max_pval_matrix)
+    
+  }
+  
+  
+  
   return(res)
 }

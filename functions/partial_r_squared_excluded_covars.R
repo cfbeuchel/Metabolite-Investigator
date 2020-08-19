@@ -29,7 +29,7 @@ partial_r_squared_excluded_covars <- function(cohort,
       # start by checking for singular predictors
       my.test.formula <- as.formula(
         paste0(
-          my.metab, " ~ ",
+          "`", my.metab, "`", " ~ ",
           paste(all.covars,
                 collapse = " + ")))
       mm <- model.matrix(my.test.formula, data[cohort == my.cohort, ])
@@ -45,8 +45,8 @@ partial_r_squared_excluded_covars <- function(cohort,
       # my.covar <- all.covars[1] # debug 
 
       # start by building the full and minus one model
-      my.full.formula <- as.formula(paste0(my.metab, " ~ ", paste(all.covars, collapse = " + ")))
-      my.reduced.formula <- as.formula(paste0(my.metab, " ~ 1",
+      my.full.formula <- as.formula(paste0("`", my.metab, "`", " ~ ", paste(all.covars, collapse = " + ")))
+      my.reduced.formula <- as.formula(paste0("`", my.metab, "`", " ~ 1",
                                               ifelse(length(all.covars) == 1, "", " + "),
                                               paste(all.covars[which(all.covars != my.covar)], collapse = " + ")))
       

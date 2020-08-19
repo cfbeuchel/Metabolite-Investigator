@@ -74,7 +74,8 @@ find_relevant_covariates <- function(
   })
   
   # bind before casting 
-  pr2sel.res <- rbindlist(all.pr2sel.res)
+  # old : pr2sel.res <- rbindlist(all.pr2sel.res)
+  pr2sel.res <- (all.pr2sel.res)
   
   # print the model selection result
   final.res.paper <- pr2sel.res[
@@ -186,12 +187,12 @@ find_relevant_covariates <- function(
   
   # print some results
   message("Mean/Max explained variance per cohort")
-  print(r2.total[, .(mean = mean(model.r.squared),
+  print(r2.total[!is.na(model.r.squared), .(mean = mean(model.r.squared),
                      max = max(model.r.squared),
                      max.metab = metab[model.r.squared == max(model.r.squared)]), by = cohort])
   
   # cast
-  full.model.r.squared <- partial.res[, .(max.r.squared = max(term.r.squared)), by = .(cohort, term)]
+  full.model.r.squared <- partial.res[!is.na(term.r.squared), .(max.r.squared = max(term.r.squared)), by = .(cohort, term)]
   full.model.r.squared <- dcast(full.model.r.squared, term ~ cohort, value.var = "max.r.squared")
   names(full.model.r.squared)[1] <- "covariate"
   

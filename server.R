@@ -307,6 +307,20 @@ server <- function(input, output, session) {
     values$dat <- results[["dat"]]
     values$c.cols <- names(results$na.cols)[results$na.cols == FALSE]
     
+    # clean names 
+    values$c.cols <- gsub(pattern = "'|`",
+                          replacement = "", 
+                          x = values$c.cols, 
+                          fixed = FALSE)
+    values$m.cols <- gsub(pattern = "'|`",
+                          replacement = "", 
+                          x = values$m.cols, 
+                          fixed = FALSE)
+    names(values$dat) <- gsub(pattern = "'|`",
+                              replacement = "", 
+                              x = names(values$dat), 
+                              fixed = FALSE)
+    
     # save an indicator that the previous step was sucessful
     values$success.merge <- 1
     
@@ -590,6 +604,7 @@ server <- function(input, output, session) {
     # build heatmap of results
     output$heat.univar <- renderPlot({
       custom_corrplot(uni.max.matrix$r2matrix,
+                      tl.cex = ifelse(max(nchar(m.cols))>30, 0.3, 1),
                       method="color",
                       is.corr = F,
                       p.mat = uni.max.matrix$pvalmatrix,
@@ -971,6 +986,7 @@ server <- function(input, output, session) {
       custom_corrplot(multi.max.matrix$r2matrix,
                       method="color",
                       is.corr = F,
+                      tl.cex = ifelse(max(nchar(m.cols))>30, 0.3, 1),
                       p.mat = multi.max.matrix$pvalmatrix,
                       insig = "label_sig", 
                       sig.level=0.05, 
