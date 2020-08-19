@@ -308,15 +308,15 @@ server <- function(input, output, session) {
     values$c.cols <- names(results$na.cols)[results$na.cols == FALSE]
     
     # clean names 
-    values$c.cols <- gsub(pattern = "'|`",
+    values$c.cols <- gsub(pattern = "'|`| ",
                           replacement = "", 
                           x = values$c.cols, 
                           fixed = FALSE)
-    values$m.cols <- gsub(pattern = "'|`",
+    values$m.cols <- gsub(pattern = "'|`| ",
                           replacement = "", 
                           x = values$m.cols, 
                           fixed = FALSE)
-    names(values$dat) <- gsub(pattern = "'|`",
+    names(values$dat) <- gsub(pattern = "'|`| ",
                               replacement = "", 
                               x = names(values$dat), 
                               fixed = FALSE)
