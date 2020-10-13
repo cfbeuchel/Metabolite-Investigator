@@ -34,6 +34,13 @@ univariable_assoc <- function(dometab, docovar, data){
         # Clean the output
         coeffs.lm <- as.data.frame(mod$coefficients)
         setDT(coeffs.lm, keep.rownames = T)
+        factor.term <-  unlist(grep(pattern = mycovar, coeffs.lm$rn, value = T))
+        factor.term <- gsub(pattern = mycovar, replacement = "", x = factor.term)
+        factor.term[factor.term == ""] <- NA
+        if(all(!is.na(factor.term))) {
+          all.levels <- paste(unique(mydata[[mycovar]]),collapse=", ")
+          factor.term <- paste0(factor.term, " (Levels: ", all.levels, ")")
+        } 
         estimate.lm <- unlist(coeffs.lm[rn %in% (grep(pattern = mycovar, coeffs.lm$rn, value = T)), "Estimate"])
         std.error.lm <- unlist(coeffs.lm[rn %in% (grep(pattern = mycovar, coeffs.lm$rn, value = T)), "Std. Error"])
         pval.lm <- unlist(coeffs.lm[rn %in% (grep(pattern = mycovar, coeffs.lm$rn, value = T)), "Pr(>|t|)"])
@@ -42,6 +49,7 @@ univariable_assoc <- function(dometab, docovar, data){
         res <- data.table::data.table(cohort = mycohort, 
                                       metab = mymetab,
                                       term = mycovar,
+                                      factor.term = factor.term,
                                       estimate = estimate.lm,
                                       std.error = std.error.lm,
                                       r.squared = mod$adj.r.squared,
@@ -56,6 +64,7 @@ univariable_assoc <- function(dometab, docovar, data){
         res <- data.table(cohort = mycohort,
                           metab = mymetab,
                           term = mycovar,
+                          factor.term = NA,
                           estimate = NA,
                           std.error = NA,
                           r.squared = NA,
@@ -69,11 +78,11 @@ univariable_assoc <- function(dometab, docovar, data){
     ) # End of tryCatch()
     
     # in case of factor, this will be longer than 1 -> only use the most important factor
-    if(nrow(res) != 1){
-      
-      # get the result with the highest r²
-      res <- res[which(p.value == min(p.value, na.rm = T)), ]
-    }
+    # if(nrow(res) != 1){
+    #   
+    #   # get the result with the highest r²
+    #   res <- res[which(p.value == min(p.value, na.rm = T)), ]
+    # }
     
     # return res to all_covar as a result of the lapply loop
     return(res)
