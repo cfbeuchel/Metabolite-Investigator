@@ -4,7 +4,7 @@
 
 ## Description
 
-This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). Features of the App are:
+This is a Shiny-App with the aim of facilitating association and covariate selection for targeted metabolomics data from multiple studies with a wide range of factors (demographic, lifestyle, etc.). A detailed description of the implemented methods can be found [here](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btaa967/5983322). Features of the App are:
 
 A detailed description of the methods used in the analysis as well as an application with data for 63 metabolites and 29 factors in three studies (N=16,222) is integrated in the LHA ([Leipzig Health Atlas](https://www.health-atlas.de/)) [here](https://www.health-atlas.de/models/23).
 
@@ -57,6 +57,22 @@ Replace the directory within the brackets with location of the folder on your sy
 
 The App comes with example data from two cohorts that may be used to try out
 the functionality. Press the `Use Example Data` button to load the data and try out the application. 
+
+## Docker Archive
+
+For backwards-compatibility, we also offer a docker archive of previous versions of the app [on GitLab](https://gitlab.com/imise-genstat/metabolite-investigator-archive/container_registry/1612096) (starting from Version 0.1.6). These docker-images can be pulled from the archive and run within a working docker environmnent as follows:
+
+1. Go to https://gitlab.com/imise-genstat/metabolite-investigator-archive/container_registry/1612096
+2. Look for a tagged version you would like to run using docker
+3. The download link for the docker command is available at the "clipboard"-symbol next to the tag-name (e.g. 0.1.6)
+4. Use the `docker pull` command to download the selected image to your computer
+5. Run a local version of the downloaded image
+
+```
+# Using the initial release version 0.1.6 as an example: 
+docker pull registry.gitlab.com/imise-genstat/metabolite-investigator-archive:0.1.6
+docker run -it -p 3838:3838 registry.gitlab.com/imise-genstat/metabolite-investigator-archive:0.1.6
+```
 
 ## Requirements
 
