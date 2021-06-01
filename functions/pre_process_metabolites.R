@@ -13,6 +13,9 @@ pre_process_metabolites <- function(
   m.cols <- metaboliteColumns
   c.cols <- covariateColumns
   
+  # create col in case no batch adjustment was performed
+  annot.m[, batch.adjustment.in := "None"]
+  
   ###============###
   # Start analysis #
   ###============###
