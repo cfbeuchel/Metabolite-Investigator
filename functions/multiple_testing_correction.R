@@ -57,8 +57,7 @@ multiple_testing_correction <- function(
     #     )$fdr_level1,
     #   by = .(cohort)]
     
-    
-    hier <- all.multi[, addHierarchFDR(
+    hier <- all.multi[, c("p","category", "fdr_level1", "fdr_level2", "hierarch_fdr5proz") := addHierarchFDR(
       pvalues = p.value,
       categs = as.character(term),
       fdrmethod_level1 = "bonferroni",
@@ -68,35 +67,37 @@ multiple_testing_correction <- function(
     by = .(cohort)]
     
     p.col <- c("p.hierarchical.bonferroni.level1", "p.hierarchical.bonferroni.level2", "p.hierarchical.bonferroni.sig")
+    
+    stopifnot(all(hier$p == all.multi$p.value))
+    
     all.multi$p.hierarchical.bonferroni.level1 <- hier$fdr_level1
     all.multi$p.hierarchical.bonferroni.level2 <- hier$fdr_level2
     all.multi$p.hierarchical.bonferroni.sig <- hier$hierarch_fdr5proz
     
+    # remove temp columns
+    all.multi[,c("p","category", "fdr_level1", "fdr_level2", "hierarch_fdr5proz") := NULL]
     
   } else if(multiple.testing.correction == "hierarchical.bb"){
     
     # Benjamini Bogomolov -> standard BH-BH and BB second level adjustment
-    # p.col <- "p.benjamini.bogomolov"
-    # all.multi[
-    #   , p.benjamini.bogomolov := 
-    #     addHierarchFDR(
-    #       pvalues = p.value,
-    #       categs = as.character(term)
-    #     )$fdr_level1, by = .(cohort)]
-    
+
     hier <- all.multi[
-      , p.benjamini.bogomolov := 
+      , c("p","category", "fdr_level1", "fdr_level2", "hierarch_fdr5proz") := 
         addHierarchFDR(
           pvalues = p.value,
           categs = as.character(term)
         ), by = .(cohort)]
+    
+    # check that nothing was mixed
+    stopifnot(all(hier$p == all.multi$p.value))
     
     p.col <- c("p.benjamini.bogomolov.level1", "p.benjamini.bogomolov.level2", "p.benjamini.bogomolov.sig")
     all.multi$p.benjamini.bogomolov.level1 <- hier$fdr_level1
     all.multi$p.benjamini.bogomolov.level2 <- hier$fdr_level2
     all.multi$p.benjamini.bogomolov.sig <- hier$hierarch_fdr5proz
     
-    
+    # remove temp columns
+    all.multi[,c("p","category", "fdr_level1", "fdr_level2", "hierarch_fdr5proz") := NULL]
     
   } else {
     stop("Non-avaliable multiple-testing correction method supplied. Please choose one of the four available methods.")
@@ -105,7 +106,7 @@ multiple_testing_correction <- function(
   # reorder columns
   setnames(all.multi, old = c("term", "response"), new = c("covariate", "metabolite"))
   setnames(failed.multi, old = c("term", "response"), new = c("covariate", "metabolite"))
-  all.multi[, .SD, .SDcols = c("cohort",
+  all.multi <- all.multi[, .SD, .SDcols = c("cohort",
                                "covariate",
                                "metabolite",
                                "estimate",
