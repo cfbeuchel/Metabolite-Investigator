@@ -26,7 +26,7 @@ install_dependencies <- function(){
 
       BiocManager::install("sva")
     }
-    install.packages(to.install[to.install!="sva"], repos = "https://cran.uni-muenster.de/")
+    install.packages(to.install[to.install!="sva"], repos = "https://cloud.r-project.org/")
   }
   
 }
